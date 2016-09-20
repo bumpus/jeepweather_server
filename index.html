@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <title>Jeep Weather Status</title>
+   <body>
+      <div id=status></div>
+      <div id=time></div>
+      <script>
+var xmlhttp = new XMLHttpRequest();
+var url = "api.php/1/";
+
+xmlhttp.onreadystatechange = function(){
+   if (this.readyState == 4 && this.status == 200){
+      var information = JSON.parse(this.responseText);
+      showStatus(information);
+   }
+};
+
+function showStatus(myStatus){
+   var statustext = "";
+   var rain_time = "Rain is coming ";
+   if (myStatus["naked_jeep_weather"]!= null){
+      if(myStatus["naked_jeep_weather"]){
+         statustext = "Take your top off!!";
+      }else{
+         statustext = "Put your top on!";
+      }
+      document.getElementById("status").innerHTML = statustext;
+   }
+
+   if (myStatus["naked_jeep_weather"]!=null){
+      var now = new Date();
+      var d = new Date(1000*myStatus["rain_chance_time"]);
+      var hour;
+      var ampm;
+      if(d.getHours()==0){
+         hour=12;
+         ampm='am';
+      }else{
+         if (d.getHours()>12){
+            hour=d.getHours()-12;
+            ampm='pm';
+         }else{
+            hour=d.getHours();
+            ampm='am';
+         }
+      }
+      switch(d.getDate()-now.getDate()){
+         case 0:
+            //Rain is coming today
+            rain_time += "today at " + hour + ':' + ('0' + d.getMinutes()).slice(-2) + ampm +'.';
+            break;
+         case 1:
+            rain_time += "tomorrow at " + hour + ':' + ('0' + d.getMinutes()).slice(-2) + ampm +'.';
+            break;
+         default:
+            var day;
+            switch(date.getDay()){
+               case 0:
+                  day = "Sunday";
+                  break;
+               case 1:
+                  day = "Monday";
+                  break;
+               case 2:
+                  day = "Tuesday";
+                  break;
+               case 3:
+                  day = "Wednesday";
+                  break;
+               case 4:
+                  day = "Thursday";
+                  break;
+               case 5:
+                  day = "Friday";
+                  break;
+               case 6:
+                  day = "Saturday";
+            }
+            rain_time += day + " at " + hour + ':' + ('0' + d.getMinutes()).slice(-2) + ampm + '.';
+      }
+      
+      document.getElementById("time").innerHTML = rain_time;
+   }
+}
+
+function getWeatherInfo(position){
+   var locationcoordinates = position.coords.latitude + "," + position.coords.longitude;
+   document.getElementById("status").innerHTML = "Getting weather data for: " + locationcoordinates;
+   xmlhttp.open("GET", url + locationcoordinates, true);
+   xmlhttp.send();
+}
+
+function getLocation(){
+   if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(getWeatherInfo);
+   }else{
+      document.getElementById("status").innerHTML = "Geolocaiton is not supported by this browser.";
+   }
+}
+
+document.getElementById("status").innerHTML = "Getting Location";
+getLocation();
+
+
+      </script>
+   </body>
+</html>
+
