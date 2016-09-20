@@ -1,6 +1,6 @@
 <?php
 
-include "forecast_io.php";
+include "darksky.php";
 
 header('Content-Type: application/json');
 
@@ -71,7 +71,7 @@ class JeepForecast{
          }
       }
 
-      $webservice = new forecast_io($this->location);
+      $webservice = new darksky($this->location);
 
       $this->forecast_url = $webservice->get_url();
       $this->getForecast();

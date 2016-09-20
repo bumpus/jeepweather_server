@@ -1,5 +1,5 @@
 <?php
-class forecast_io{
+class darksky{
    private $base_url = "https://api.forecast.io/forecast/";
    private $api_key = "Insert YOUR KEY here";
    private $location;
