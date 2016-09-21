@@ -5,6 +5,7 @@
    <body>
       <div id=status></div>
       <div id=time></div>
+      <div id=power><a href = "https://darksky.net/poweredby/">Powered by Dark Sky</a></div>
       <script>
 var xmlhttp = new XMLHttpRequest();
 var url = "api.php/1/";
@@ -33,16 +34,18 @@ function showStatus(myStatus){
       var d = new Date(1000*myStatus["rain_chance_time"]);
       var hour;
       var ampm;
+      if(d.getHours()<12){
+         ampm='am';
+      }else{
+         ampm='pm';
+      }
       if(d.getHours()==0){
          hour=12;
-         ampm='am';
       }else{
          if (d.getHours()>12){
             hour=d.getHours()-12;
-            ampm='pm';
          }else{
             hour=d.getHours();
-            ampm='am';
          }
       }
       switch(d.getDate()-now.getDate()){
