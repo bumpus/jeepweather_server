@@ -33,6 +33,10 @@ class JeepForecast{
 
    private $debug = false;
 
+   private $next_hour_rain_chance;
+   private $next_two_day_rain_chance;
+   private $next_week_rain_chance;
+
    function __construct(){ 
       //Explode the request. I expect the following:
       //parameters[0] = "" - Directory path from the root of the server
@@ -88,6 +92,8 @@ class JeepForecast{
       if($this->naked_jeep_weather){
          $this->determine_next_two_days();
       }
+
+      $this->package_rain_chance();
       
 
 
@@ -102,7 +108,7 @@ class JeepForecast{
       $this->forecast_php = json_decode($this->forecast_json);
    }
 
-   function determine_next_hour(){
+   private function determine_next_hour(){
       for($i=2; $i<sizeof($this->forecast_php->minutely->data); $i++){
          $three_minute_rainchance = $this->forecast_php->minutely->data[$i-2]->precipProbability +
                                     $this->forecast_php->minutely->data[$i-1]->precipProbability +
@@ -122,7 +128,7 @@ class JeepForecast{
       }
    }
 
-   function determine_next_two_days(){
+   private function determine_next_two_days(){
       //Skip the current hour if minute by minute data is available
       //This avoids a condition where the current hour may have a
       //rain chance that has already passed.
@@ -158,15 +164,49 @@ class JeepForecast{
       }
    }
 
+   private function package_rain_chance(){
+      //Make an array of times and hourly rain chance
+      //I'll move from a decimal to a percent at this point
+      for($i=0; $i<sizeof($this->forecast_php->hourly->data); $i++){
+         $this->next_two_day_rain_chance[$this->forecast_php->hourly->data[$i]->time] =
+            100 * $this->forecast_php->hourly->data[$i]->precipProbability;
+      }
+
+      //Make an array of rain chance by the minute
+      if(isset($this->forecast_php->minutely)){
+         for($i=0;$i<sizeof($this->forecast_php->minutely->data); $i++){
+            $this->next_hour_rain_chance[$this->forecast_php->minutely->data[$i]->time] =
+               100 * $this->forecast_php->minutely->data[$i]->precipProbability;
+         }
+      }
+
+      //Make an array of rain chance by the day for next week or so
+      for($i=0; $i<sizeof($this->forecast_php->daily->data); $i++){
+         $this->next_week_rain_chance[$this->forecast_php->daily->data[$i]->time] =
+            100 * $this->forecast_php->daily->data[$i]->precipProbability;
+      }
+   }
+
    function debug_enabled(){
       return $this->debug;
    }
 
    function get_results(){
+
       $results['naked_jeep_weather'] = $this->naked_jeep_weather;
+
       if (isset($this->rain_chance_time)){
          $results['rain_chance_time'] = $this->rain_chance_time;
       }
+
+      $results['next_two_day_rain_chance'] = $this->next_two_day_rain_chance;
+
+      if (isset($this->forecast_php->minutely)){
+         $results['next_hour_rain_chance'] = $this->next_hour_rain_chance;
+      }
+
+      $results['next_week_rain_chance'] = $this->next_week_rain_chance;
+
       return json_encode($results);
    }
 
@@ -225,6 +265,7 @@ class JeepForecast{
       return $string;
    }
 }
+
 $myForecast = new JeepForecast;
 echo $myForecast->get_results();
 if($myForecast->debug_enabled()){
