@@ -3,6 +3,7 @@
    <head>
       <title>Jeep Weather Status</title>
       <link rel="stylesheet" type="text/css" href="jeep.css" />
+      <link rel="shortcut icon" href="closed.ico" />
    </head>
    <body>
       <h1>Weather Forecast for your Jeep</h1>
@@ -25,18 +26,22 @@ xmlhttp.onreadystatechange = function(){
 
 function showStatus(myStatus){
    var statustext = "";
+   var icon = "";
    var rain_time = "Rain is coming ";
    if (myStatus["naked_jeep_weather"]!= null){
       if(myStatus["naked_jeep_weather"]){
          statustext = "Take your top off!!";
+         icon = "open.ico";
       }else{
          statustext = "Put your top on!";
+         icon = "closed.ico";
       }
       document.getElementById("status").innerHTML = statustext;
+      document.querySelector("link[rel='shortcut icon']").href = icon;
    }
 
    if (myStatus["rain_chance_time"]!=null){
-      rain_time += getPrintedTime(myStatus["rain_chance_time"]); 
+      rain_time += getPrintedTime(myStatus["rain_chance_time"],1); 
       document.getElementById("time").innerHTML = rain_time;
    }
 
@@ -44,7 +49,7 @@ function showStatus(myStatus){
       document.getElementById("rain_minute").innerHTML = "<h2>Next Hour Rain Chance</h2>";
       document.getElementById("rain_minute").innerHTML += populateWeatherGraphs(myStatus["next_hour_rain_chance"],true);
    }
-   document.getElementById("rain_hour").innerHTML = "<h2>Next Two Day Rain Chance</h2>";
+   document.getElementById("rain_hour").innerHTML = "<h2>Next Two Days Rain Chance</h2>";
    document.getElementById("rain_hour").innerHTML += populateWeatherGraphs(myStatus["next_two_day_rain_chance"],true);
 
    document.getElementById("rain_day").innerHTML = "<h2>Next Week Rain Chance</h2>";
