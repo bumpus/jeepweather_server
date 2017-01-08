@@ -1,0 +1,19 @@
+{
+   "manifest_version": 2,
+   "name": "Jeep Weather Forecast",
+   "version": "0.0.0.0",
+
+   "description": "This extension show a Google Image search result for the current page",
+
+   "browser_action": {
+      "default_icon": "closed.png",
+      "default_popup": "popup.html"
+   },
+
+   "permissions": [
+      "geolocation",
+      "https://jeepweather.bump.us/",
+      "https://darksyk.net/"
+   ]
+}
+
