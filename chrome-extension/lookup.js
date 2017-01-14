@@ -9,10 +9,10 @@ xmlhttp.onreadystatechange = function(){
       var icon = "";
       if(information['jeepweather']){
          console.log("Good Jeep weather");
-         icon="open.png";
+         icon="open-16.png";
       }else{
          console.log("Bad Jeep weather");
-         icon="closed.png";
+         icon="closed-16.png";
       }
       chrome.browserAction.setIcon({path:icon});
       chrome.storage.local.set({'weatherdata': information});
@@ -45,6 +45,7 @@ function onInit(){
 function onAlarm(alarm){
    console.log("in onAlarm()", alarm);
    if(alarm && alarm.name == 'refreshWeatherData'){
+      chrome.browerAction.setIcon({path:unknown-16.png});
       chrome.storage.local.set({'weatherdata': ""},getLocation());
    }
 }

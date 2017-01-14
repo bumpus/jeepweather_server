@@ -62,10 +62,10 @@ function showStatus(myStatus){
    if (myStatus["naked_jeep_weather"]!= null){
       if(myStatus["naked_jeep_weather"]){
          statustext = "Take your top off!!";
-         icon = "open.png";
+         icon = "open-16.png";
       }else{
          statustext = "Put your top on!";
-         icon = "closed.png";
+         icon = "closed-16.png";
       }
       document.getElementById("status").innerHTML = statustext;
       chrome.browserAction.setIcon({path:icon});
