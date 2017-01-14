@@ -20,7 +20,7 @@
 
    "background":
    {
-      "scripts": ["lookup.js"],
+      "scripts": ["lookup.js", "printed-time.js"],
       "persistent": false
    },
 

@@ -7,14 +7,21 @@ xmlhttp.onreadystatechange = function(){
    if (this.readyState == 4 && this.status == 200){
       var information = JSON.parse(this.responseText);
       var icon = "";
+      var title = "";
       if(information['jeepweather']){
          console.log("Good Jeep weather");
          icon="open-16.png";
+         title = "Take your top off!!";
       }else{
          console.log("Bad Jeep weather");
          icon="closed-16.png";
+         title = "Put your top on!";
       }
       chrome.browserAction.setIcon({path:icon});
+      if(information['rain_chance_time']!= null){
+         title += " Rain is coming " + getPrintedTime(information['rain_chance_time'],1);
+      }
+      chrome.browserAction.setTitle({title:title});
       chrome.storage.local.set({'weatherdata': information});
    }
 };
