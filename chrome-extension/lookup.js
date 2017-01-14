@@ -52,7 +52,7 @@ function onInit(){
 function onAlarm(alarm){
    console.log("in onAlarm()", alarm);
    if(alarm && alarm.name == 'refreshWeatherData'){
-      chrome.browerAction.setIcon({path:"unknown-16.png"});
+      chrome.browserAction.setIcon({path:"unknown-16.png"});
       chrome.storage.local.set({'weatherdata': ""},getLocation());
    }
 }
