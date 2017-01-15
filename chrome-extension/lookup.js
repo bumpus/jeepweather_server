@@ -1,6 +1,7 @@
 var xmlhttp = new XMLHttpRequest();
 var url = "https://jeepweather.bump.us/api.php/1/";
 var refreshPeriod = 30;
+var inactivityTimeout = 5 * 60;
 
 xmlhttp.onreadystatechange = function(){
    console.log("in onreadystatechange()");
@@ -43,6 +44,20 @@ function getLocation(){
    }
 }
 
+function idleCheck(){
+   console.log("in idleCheck()");
+   chrome.idle.queryState(inactivityTimeout,idleResults); 
+}
+
+function idleResults(newState){
+   console.log("in idleResults() newState is: ", newState);
+   if (newState=="active"){
+      getLocation();
+   }else{
+      chrome.storage.local.set({'inactivity':true});
+   }
+}
+
 function onInit(){
    console.log("in onInit()");
    chrome.alarms.create('refreshWeatherData', {periodInMinutes:refreshPeriod});
@@ -50,13 +65,30 @@ function onInit(){
 }
 
 function onAlarm(alarm){
-   console.log("in onAlarm()", alarm);
+   console.log("in onAlarm() ", alarm);
    if(alarm && alarm.name == 'refreshWeatherData'){
       chrome.browserAction.setIcon({path:"unknown-16.png"});
-      chrome.storage.local.set({'weatherdata': ""},getLocation());
+      chrome.storage.local.set({'weatherdata': ""},idleCheck());
+   }
+}
+
+function onIdleStateChanged(newState){
+   console.log("in onIdleStateChanged: new state is ", newState);
+   if (newState=="active"){
+      chrome.storage.local.get('inactivity', checkInactivity);
+   }
+}
+
+function checkInactivity(result){
+   console.log("in checkInactivity()");
+   if(result['inactivity']){
+      chrome.storage.local.set({'inactivity':false});
+      getLocation();
    }
 }
 
 chrome.runtime.onInstalled.addListener(onInit);
 chrome.alarms.onAlarm.addListener(onAlarm);
+chrome.idle.onStateChanged.addListener(onIdleStateChanged);
+chrome.idle.setDetectionInterval(inactivityTimeout);
 

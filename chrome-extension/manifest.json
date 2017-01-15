@@ -1,7 +1,7 @@
 {
    "manifest_version": 2,
    "name": "Jeep Weather Forecast",
-   "version": "0.0.0.4",
+   "version": "0.0.1.0",
 
    "description": "This extension shows the if there is dry weather ahead for Jeeping with the top down.",
 
@@ -29,6 +29,7 @@
       "geolocation", 
       "storage", 
       "alarms",
+      "idle",
       "https://jeepweather.bump.us/" 
    ] 
 }
