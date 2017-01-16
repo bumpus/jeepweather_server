@@ -95,7 +95,7 @@ function populateWeatherGraphs(rain_array, timeanddate){
          +"<span class='info'>"
          +rain_array[i]+"% chance of rain " + getPrintedTime(i, timeanddate)
          +"</span>"
-         +"<div class=graphbar style=\"height: "+rain_array[i]/2+"px\" >"
+         +"<div class=graphbar style=\"height: "+40*rain_array[i]/100+"px\" >"
          +"</div>"
          +"</div>"
    }
