@@ -9,7 +9,7 @@ xmlhttp.onreadystatechange = function(){
       var information = JSON.parse(this.responseText);
       var icon = "";
       var title = "";
-      if(information['jeepweather']){
+      if(information['naked_jeepweather']){
          console.log("Good Jeep weather");
          icon="open-16.png";
          title = "Take your top off!!";
