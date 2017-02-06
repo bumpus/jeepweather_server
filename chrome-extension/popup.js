@@ -77,7 +77,7 @@ function showStatus(myStatus){
       chrome.browserAction.setTitle({title:statustext + " " + rain_time});
    }
 
-   if ('next_hour_rain_chance' in myStatus){
+   if (myStatus.hasOwnProperty('next_hour_rain_chance')){
       document.getElementById("rain_minute").innerHTML = "<h2>Next Hour Rain Chance</h2>";
       document.getElementById("rain_minute").innerHTML += populateWeatherGraphs(myStatus["next_hour_rain_chance"],true);
    }
