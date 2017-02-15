@@ -1,9 +1,9 @@
 {
    "manifest_version": 2,
    "name": "Jeep Weather Forecast",
-   "version": "0.0.1.4",
+   "version": "0.0.2.0",
 
-   "description": "This extension shows the if there is dry weather ahead for Jeeping with the top down.",
+   "description": "This extension shows the if there is dry weather ahead for Jeeping with the top down and the current temperature.",
 
    "browser_action": 
    { 

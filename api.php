@@ -31,6 +31,8 @@ class JeepForecast{
 
    private $naked_jeep_weather;
 
+   private $current_temp;
+
    private $debug = false;
 
    private $next_hour_rain_chance;
@@ -94,6 +96,8 @@ class JeepForecast{
       }
 
       $this->package_rain_chance();
+
+      $this->current_temp = round($this->forecast_php->currently->temperature);
       
 
 
@@ -206,6 +210,8 @@ class JeepForecast{
       }
 
       $results['next_week_rain_chance'] = $this->next_week_rain_chance;
+
+      $results['current_temp'] = $this->current_temp;
 
       return json_encode($results);
    }

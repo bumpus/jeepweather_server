@@ -19,6 +19,7 @@ xmlhttp.onreadystatechange = function(){
          title = "Put your top on!";
       }
       chrome.browserAction.setIcon({path:icon});
+      chrome.browserAction.setBadgeText({text: information['current_temp']+""});
       if(information['rain_chance_time']!= null){
          title += " Rain is coming " + getPrintedTime(information['rain_chance_time'],1);
       }

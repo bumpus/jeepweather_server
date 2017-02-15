@@ -1,3 +1,9 @@
+#temp {
+   float: right;
+   color: green;
+   font-size: x-large;
+}
+
 #status {
    color: blue;
 }

@@ -56,6 +56,7 @@ function onGetWeatherData(result){
 
 function showStatus(myStatus){
    console.log("showStatus");
+   document.getElementById("temp").innerHTML = myStatus['current_temp']+"&deg;F";
    var statustext = "";
    var icon = "";
    var rain_time = "Rain is coming ";

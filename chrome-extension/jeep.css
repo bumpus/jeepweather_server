@@ -6,6 +6,12 @@ body{
    width:780px;
 }
 
+#temp {
+   float: right;
+   font-size: x-large;
+   color: green;
+}
+
 #status {
    color: blue;
 }
