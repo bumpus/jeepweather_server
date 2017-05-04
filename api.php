@@ -77,6 +77,16 @@ class JeepForecast{
          }
       }
 
+
+      if($this->location == "IP"){
+         // Client has failed to get location from browser
+         // Request IP from web service
+         $iplookupurl = "http://ipinfo.io/" . $_SERVER['REMOTE_ADDR'] ."/loc";
+         // echo "iplookupurl: " + $iplookupurl;
+         // echo "remote_addr: " + $_SERVER['REMOTE_ADDR'];
+         $this->location = trim(file_get_contents($iplookupurl));
+      }
+
       $webservice = new darksky($this->location);
 
       $this->forecast_url = $webservice->get_url();
@@ -196,6 +206,10 @@ class JeepForecast{
    }
 
    function get_results(){
+
+      $results['location'] = $this->location;
+
+      $results['client_ip'] = $_SERVER['REMOTE_ADDR']; 
 
       $results['naked_jeep_weather'] = $this->naked_jeep_weather;
 

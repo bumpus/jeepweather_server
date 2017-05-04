@@ -17,6 +17,7 @@
       <script>
 var xmlhttp = new XMLHttpRequest();
 var url = "api.php/1/";
+var locationcoordinates = "";
 
 xmlhttp.onreadystatechange = function(){
    if (this.readyState == 4 && this.status == 200){
@@ -136,16 +137,23 @@ function populateWeatherGraphs(rain_array, timeanddate){
    }
    return graphs;
 }
+
 function getWeatherInfo(position){
-   var locationcoordinates = position.coords.latitude + "," + position.coords.longitude;
+   locationcoordinates = position.coords.latitude + "," + position.coords.longitude;
    document.getElementById("status").innerHTML = "Getting weather data for: " + locationcoordinates;
    xmlhttp.open("GET", url + locationcoordinates, true);
    xmlhttp.send();
 }
 
+function getWeatherInfoIP(position){
+   document.getElementById("status").innerHTML = "Getting weather data for your estimated location";
+   xmlhttp.open("GET", url + "IP", true);
+   xmlhttp.send();
+}
+
 function getLocation(){
    if(navigator.geolocation){
-      navigator.geolocation.getCurrentPosition(getWeatherInfo);
+      navigator.geolocation.getCurrentPosition(getWeatherInfo, getWeatherInfoIP);
    }else{
       document.getElementById("status").innerHTML = "Geolocaiton is not supported by this browser.";
    }
