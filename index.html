@@ -139,7 +139,7 @@ function populateWeatherGraphs(rain_array, timeanddate){
 }
 
 function getWeatherInfo(position){
-   locationcoordinates = position.coords.latitude + "," + position.coords.longitude;
+   var locationcoordinates = position.coords.latitude + "," + position.coords.longitude;
    document.getElementById("status").innerHTML = "Getting weather data for: " + locationcoordinates;
    xmlhttp.open("GET", url + locationcoordinates, true);
    xmlhttp.send();
@@ -155,7 +155,7 @@ function getLocation(){
    if(navigator.geolocation){
       navigator.geolocation.getCurrentPosition(getWeatherInfo, getWeatherInfoIP);
    }else{
-      document.getElementById("status").innerHTML = "Geolocaiton is not supported by this browser.";
+      document.getElementById("status").innerHTML = "Geolocation is not supported by this browser.";
    }
 }
 

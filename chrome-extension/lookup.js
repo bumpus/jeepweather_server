@@ -36,12 +36,18 @@ function getWeatherInfo(position){
    xmlhttp.send();
 }
 
+function getWeatherInfoIP(position){
+   document.getElementById("status").innerHTML = "Getting weather data for your estimated location";
+   xmlhttp.open("GET", url + "IP", true);
+   xmlhttp.send();
+}
+
 function getLocation(){
    console.log("In getLocation()");
    if(navigator.geolocation){
-      navigator.geolocation.getCurrentPosition(getWeatherInfo);
+      navigator.geolocation.getCurrentPosition(getWeatherInfo, getWeatherInfoIP);
    }else{
-      console.log("Geolocaiton is not supported by this browser.");
+      console.log("Geolocation is not supported by this browser.");
    }
 }
 
