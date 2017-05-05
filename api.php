@@ -1,6 +1,7 @@
 <?php
 
 include "darksky.php";
+include "ipinfo.io.php";
 
 header('Content-Type: application/json');
 
@@ -80,11 +81,14 @@ class JeepForecast{
 
       if($this->location == "IP"){
          // Client has failed to get location from browser
-         // Request IP from web service
-         $iplookupurl = "http://ipinfo.io/" . $_SERVER['REMOTE_ADDR'] ."/loc";
-         // echo "iplookupurl: " + $iplookupurl;
-         // echo "remote_addr: " + $_SERVER['REMOTE_ADDR'];
-         $this->location = trim(file_get_contents($iplookupurl));
+         // Request IP base location from web service.
+         $locationservice = new ipinfo($_SERVER['REMOTE_ADDR']);
+         $this->location = $locationservice->get_location();
+      }
+
+      // If somehow we still haven't got a location, use the location of the Jeep factory in Toledo
+      if(""==$this->location){
+         $this->location = "41.7012082,-83.5238018";
       }
 
       $webservice = new darksky($this->location);
