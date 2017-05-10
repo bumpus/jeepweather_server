@@ -37,7 +37,7 @@ function getWeatherInfo(position){
 }
 
 function getWeatherInfoIP(position){
-   document.getElementById("status").innerHTML = "Getting weather data for your estimated location";
+   console.log("Getting weather data for your estimated location");
    xmlhttp.open("GET", url + "IP", true);
    xmlhttp.send();
 }
