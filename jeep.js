@@ -51,7 +51,8 @@ function showStatus(myStatus){
          title : 'Next Hour Rain Chance',
          vAxis: {title: '% Rain Chance', format: 'percent', maxValue:1, minValue:0},
          hAxis: {title: 'Time'},
-         seriesType: 'bars'
+         seriesType: 'bars',
+         legend: {position: 'top'}
        };
        formatter.format(minuteData, 1);
        // Instantiate and draw our chart, passing in some options.
@@ -66,7 +67,7 @@ function showStatus(myStatus){
       hourData.addRow([new Date(i*1000),myStatus["next_two_day_rain_chance"][i].rain,myStatus["next_two_day_rain_chance"][i].temp]);
    }
    var options = {
-      title : 'Next Two Days Rain Chance',
+      title : 'Next Two Days Temperature and Rain Chance',
       vAxes: [
          //Define left Axis for % rain chance
          {title: '% Rain Chance', format: 'percent', maxValue:1, minValue:0},
@@ -92,7 +93,7 @@ function showStatus(myStatus){
       dayData.addRow([new Date(i*1000),myStatus["next_week_rain_chance"][i].rain,myStatus["next_week_rain_chance"][i].hightemp,myStatus["next_week_rain_chance"][i].lowtemp]);
    }
    var options = {
-      title : 'Next Week Rain Chance',
+      title : 'Next Week High/Low Temperature and Rain Chance',
       vAxes: [
          //Define left Axis for % rain chance
          {title: '% Rain Chance', format: 'percent', maxValue:1, minValue:0},
