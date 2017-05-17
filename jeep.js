@@ -86,8 +86,8 @@ function showStatus(myStatus){
    var dayData = new google.visualization.DataTable();
    dayData.addColumn('date', 'Date');
    dayData.addColumn('number', 'Rain Chance');
-   dayData.addColumn('number', 'High Temp');
-   dayData.addColumn('number', 'Low Temp');
+   dayData.addColumn('number', 'High Temperature');
+   dayData.addColumn('number', 'Low Temperature');
    for (var i in myStatus["next_week_rain_chance"]){
       dayData.addRow([new Date(i*1000),myStatus["next_week_rain_chance"][i].rain,myStatus["next_week_rain_chance"][i].hightemp,myStatus["next_week_rain_chance"][i].lowtemp]);
    }

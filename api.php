@@ -195,7 +195,7 @@ class JeepForecast{
          if(1<$this->api_version){
             $this->next_two_day_rain_chance[$this->forecast_php->hourly->data[$i]->time] = [
                'rain'=> $this->forecast_php->hourly->data[$i]->precipProbability,
-               'temp'=> $this->forecast_php->hourly->data[$i]->temperature
+               'temp'=> round($this->forecast_php->hourly->data[$i]->temperature)
             ];
          }else{
             $this->next_two_day_rain_chance[$this->forecast_php->hourly->data[$i]->time] =
@@ -217,8 +217,8 @@ class JeepForecast{
          if(1<$this->api_version){
             $this->next_week_rain_chance[$this->forecast_php->daily->data[$i]->time] = [
                'rain'=> $this->forecast_php->daily->data[$i]->precipProbability,
-               'hightemp'=> $this->forecast_php->daily->data[$i]->temperatureMax,
-               'lowtemp'=> $this->forecast_php->daily->data[$i]->temperatureMin
+               'hightemp'=> round($this->forecast_php->daily->data[$i]->temperatureMax),
+               'lowtemp'=> round($this->forecast_php->daily->data[$i]->temperatureMin)
             ];
          }else{
             $this->next_week_rain_chance[$this->forecast_php->daily->data[$i]->time] =
