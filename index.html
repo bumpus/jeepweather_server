@@ -4,6 +4,8 @@
       <title>Jeep Weather Status</title>
       <link rel="stylesheet" type="text/css" href="jeep.css" />
       <link rel="shortcut icon" href="closed.ico" />
+      <!--Load the AJAX API-->
+      <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
    </head>
    <body>
       <h1>Weather Forecast for your Jeep</h1>
@@ -16,8 +18,9 @@
       <div id=power><a href = "https://darksky.net/poweredby/">Powered by Dark Sky</a></div>
       <script>
 var xmlhttp = new XMLHttpRequest();
-var url = "api.php/1/";
+var url = "api.php/2/";
 var locationcoordinates = "";
+var myStatus;
 
 xmlhttp.onreadystatechange = function(){
    if (this.readyState == 4 && this.status == 200){
@@ -25,6 +28,10 @@ xmlhttp.onreadystatechange = function(){
       showStatus(information);
    }
 };
+
+function drawChart() {
+   showStatus();
+}
 
 function showStatus(myStatus){
    document.getElementById("temp").innerHTML = myStatus['current_temp']+"&deg;F";
@@ -48,15 +55,81 @@ function showStatus(myStatus){
       document.getElementById("time").innerHTML = rain_time;
    }
 
-   if (myStatus.hasOwnProperty('next_hour_rain_chance')){
-      document.getElementById("rain_minute").innerHTML = "<h2>Next Hour Rain Chance</h2>";
-      document.getElementById("rain_minute").innerHTML += populateWeatherGraphs(myStatus["next_hour_rain_chance"],true);
-   }
-   document.getElementById("rain_hour").innerHTML = "<h2>Next Two Days Rain Chance</h2>";
-   document.getElementById("rain_hour").innerHTML += populateWeatherGraphs(myStatus["next_two_day_rain_chance"],true);
+   //Make a formatter for Percentages
+   var formatter = new google.visualization.NumberFormat({pattern: '#%'});
 
-   document.getElementById("rain_day").innerHTML = "<h2>Next Week Rain Chance</h2>";
-   document.getElementById("rain_day").innerHTML += populateWeatherGraphs(myStatus["next_week_rain_chance"],false);
+   //Only include the minute by minute forecast if we have that data.
+   if (myStatus.hasOwnProperty('next_hour_rain_chance')){
+      var minuteData = new google.visualization.DataTable();
+      minuteData.addColumn('datetime', 'Time');
+      minuteData.addColumn('number', 'Rain Chance');
+      for (var i in myStatus["next_hour_rain_chance"]){
+         minuteData.addRow([new Date(i*1000),myStatus["next_hour_rain_chance"][i]]);
+      }
+      var minuteOptions = {
+         title : 'Next Hour Rain Chance',
+         vAxis: {title: '% Rain Chance', format: 'percent', maxValue:1, minValue:0},
+         hAxis: {title: 'Time'},
+         seriesType: 'bars'
+       };
+       formatter.format(minuteData, 1);
+       // Instantiate and draw our chart, passing in some options.
+       var hourChart = new google.visualization.ComboChart(document.getElementById('rain_minute'));
+       hourChart.draw(minuteData, minuteOptions);
+   }
+   var hourData = new google.visualization.DataTable();
+   hourData.addColumn('datetime', 'Time');
+   hourData.addColumn('number', 'Rain Chance');
+   hourData.addColumn('number', 'Temperature');
+   for (var i in myStatus["next_two_day_rain_chance"]){
+      hourData.addRow([new Date(i*1000),myStatus["next_two_day_rain_chance"][i].rain,myStatus["next_two_day_rain_chance"][i].temp]);
+   }
+   var options = {
+      title : 'Next Two Days Rain Chance',
+      vAxes: [
+         //Define left Axis for % rain chance
+         {title: '% Rain Chance', format: 'percent', maxValue:1, minValue:0},
+         //Define right Axis for Temperature
+         {title: 'Temperature'}
+              ],
+      hAxis: {title: 'Time'},
+      seriesType: 'bars',
+      series: { 1: { targetAxisIndex:1, type: 'line' } }
+    };
+   formatter.format(hourData, 1);
+   // Instantiate and draw our chart, passing in some options.
+   var hourChart = new google.visualization.ComboChart(document.getElementById('rain_hour'));
+   hourChart.draw(hourData, options);
+
+
+   var dayData = new google.visualization.DataTable();
+   dayData.addColumn('date', 'Date');
+   dayData.addColumn('number', 'Rain Chance');
+   dayData.addColumn('number', 'High Temp');
+   dayData.addColumn('number', 'Low Temp');
+   for (var i in myStatus["next_week_rain_chance"]){
+      dayData.addRow([new Date(i*1000),myStatus["next_week_rain_chance"][i].rain,myStatus["next_week_rain_chance"][i].hightemp,myStatus["next_week_rain_chance"][i].lowtemp]);
+   }
+   var options = {
+      title : 'Next Week Rain Chance',
+      vAxes: [
+         //Define left Axis for % rain chance
+         {title: '% Rain Chance', format: 'percent', maxValue:1, minValue:0},
+         //Define right Axis for Temperature
+         {title: 'Temperature'}
+              ],
+      hAxis: {title: 'Time'},
+      seriesType: 'bars',
+      series: {
+         1: { targetAxisIndex:1, type: 'line' },
+         2: { targetAxisIndex:1, type: 'line' }
+      }
+    };
+   formatter.format(dayData, 1);
+   // Instantiate and draw our chart, passing in some options.
+   var dayChart = new google.visualization.ComboChart(document.getElementById('rain_day'));
+   dayChart.draw(dayData, options);
+
 }
 
 function getPrintedTime(time, timeanddate){
@@ -160,7 +233,11 @@ function getLocation(){
 }
 
 document.getElementById("status").innerHTML = "Getting Location";
-getLocation();
+// Load the Visualization API and the corechart package.
+google.charts.load('current', {'packages':['corechart']});
+
+// Set a callback to run when the Google Visualization API is loaded.
+google.charts.setOnLoadCallback(getLocation);
 
 
       </script>

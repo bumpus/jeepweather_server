@@ -183,25 +183,47 @@ class JeepForecast{
    }
 
    private function package_rain_chance(){
+      //I'll move from a decimal to a percent at this point for version 1 api
+      //version 2 api will return the result as a decimal
+      $factor = 100;
+      if(1<$this->api_version){
+         $factor = 1;
+      }
       //Make an array of times and hourly rain chance
-      //I'll move from a decimal to a percent at this point
+      //Include forecast temperatures if available on API v2 or later
       for($i=0; $i<sizeof($this->forecast_php->hourly->data); $i++){
-         $this->next_two_day_rain_chance[$this->forecast_php->hourly->data[$i]->time] =
-            100 * $this->forecast_php->hourly->data[$i]->precipProbability;
+         if(1<$this->api_version){
+            $this->next_two_day_rain_chance[$this->forecast_php->hourly->data[$i]->time] = [
+               'rain'=> $this->forecast_php->hourly->data[$i]->precipProbability,
+               'temp'=> $this->forecast_php->hourly->data[$i]->temperature
+            ];
+         }else{
+            $this->next_two_day_rain_chance[$this->forecast_php->hourly->data[$i]->time] =
+               $factor * $this->forecast_php->hourly->data[$i]->precipProbability;
+         }
       }
 
       //Make an array of rain chance by the minute
       if(isset($this->forecast_php->minutely)){
          for($i=0;$i<sizeof($this->forecast_php->minutely->data); $i++){
             $this->next_hour_rain_chance[$this->forecast_php->minutely->data[$i]->time] =
-               100 * $this->forecast_php->minutely->data[$i]->precipProbability;
+               $factor * $this->forecast_php->minutely->data[$i]->precipProbability;
          }
       }
 
       //Make an array of rain chance by the day for next week or so
+      //Include max/min forecast temperatures if available on API v2 or later
       for($i=0; $i<sizeof($this->forecast_php->daily->data); $i++){
-         $this->next_week_rain_chance[$this->forecast_php->daily->data[$i]->time] =
-            100 * $this->forecast_php->daily->data[$i]->precipProbability;
+         if(1<$this->api_version){
+            $this->next_week_rain_chance[$this->forecast_php->daily->data[$i]->time] = [
+               'rain'=> $this->forecast_php->daily->data[$i]->precipProbability,
+               'hightemp'=> $this->forecast_php->daily->data[$i]->temperatureMax,
+               'lowtemp'=> $this->forecast_php->daily->data[$i]->temperatureMin
+            ];
+         }else{
+            $this->next_week_rain_chance[$this->forecast_php->daily->data[$i]->time] =
+               $factor * $this->forecast_php->daily->data[$i]->precipProbability;
+         }
       }
    }
 
@@ -211,10 +233,11 @@ class JeepForecast{
 
    function get_results(){
 
-      $results['location'] = $this->location;
+      if(1<$this->api_version){
+         $results['location'] = $this->location;
 
-      $results['client_ip'] = $_SERVER['REMOTE_ADDR']; 
-
+         $results['client_ip'] = $_SERVER['REMOTE_ADDR']; 
+      }
       $results['naked_jeep_weather'] = $this->naked_jeep_weather;
 
       if (isset($this->rain_chance_time)){
