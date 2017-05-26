@@ -32,150 +32,225 @@ function showStatus(myStatus){
    }
 
    if (myStatus["rain_chance_time"]!=null){
-      rain_time += getPrintedTime(myStatus["rain_chance_time"],1); 
+      rain_time += moment(myStatus["rain_chance_time"]*1000).calendar(); 
       document.getElementById("time").innerHTML = rain_time;
    }
 
-   //Make a formatter for Percentages
-   var formatter = new google.visualization.NumberFormat({pattern: '#%'});
+   //Here is where the charts are drawn
 
-   //Only include the minute by minute forecast if we have that data.
+   // Start with some settings that will be common to the chart on this page
+   Chart.defaults.global.maintainAspectRatio = true;
+   Chart.defaults.global.responsive = false;
+   Chart.defaults.global.title.display = true;
+   
+   //First do the chart for the minute by minute, if that data is available
    if (myStatus.hasOwnProperty('next_hour_rain_chance')){
-      var minuteData = new google.visualization.DataTable();
-      minuteData.addColumn('datetime', 'Time');
-      minuteData.addColumn('number', 'Rain Chance');
-      for (var i in myStatus["next_hour_rain_chance"]){
-         minuteData.addRow([new Date(i*1000),myStatus["next_hour_rain_chance"][i]]);
+      var minuteRainData =[];
+
+      var minuteDataSets = {
+         labels: [],
+         datasets: [{
+            type: 'bar',
+            label: "% Chance of Rain",
+            borderColor: 'green',
+            backgroundColor: 'green',
+            data: []
+         }]
       }
+
+      for (var i in myStatus['next_hour_rain_chance']){
+         minuteDataSets.labels.push(moment(i*1000))
+         minuteDataSets.datasets[0].data.push(Math.round(myStatus["next_hour_rain_chance"][i]*100));
+      }
+
       var minuteOptions = {
-         title : 'Next Hour Rain Chance',
-         vAxis: {title: '% Rain Chance', format: 'percent', maxValue:1, minValue:0},
-         hAxis: {title: 'Time'},
-         seriesType: 'bars',
-         legend: {position: 'top'}
-       };
-       formatter.format(minuteData, 1);
-       // Instantiate and draw our chart, passing in some options.
-       var hourChart = new google.visualization.ComboChart(document.getElementById('rain_minute'));
-       hourChart.draw(minuteData, minuteOptions);
-   }
-   var hourData = new google.visualization.DataTable();
-   hourData.addColumn('datetime', 'Time');
-   hourData.addColumn('number', 'Rain Chance');
-   hourData.addColumn('number', 'Temperature');
-   for (var i in myStatus["next_two_day_rain_chance"]){
-      hourData.addRow([new Date(i*1000),myStatus["next_two_day_rain_chance"][i].rain,myStatus["next_two_day_rain_chance"][i].temp]);
-   }
-   var options = {
-      title : 'Next Two Days Temperature and Rain Chance',
-      vAxes: [
-         //Define left Axis for % rain chance
-         {title: '% Rain Chance', format: 'percent', maxValue:1, minValue:0},
-         //Define right Axis for Temperature
-         {title: 'Temperature'}
-              ],
-      hAxis: {title: 'Time'},
-      seriesType: 'bars',
-      series: { 1: { targetAxisIndex:1, type: 'line' } }
-    };
-   formatter.format(hourData, 1);
-   // Instantiate and draw our chart, passing in some options.
-   var hourChart = new google.visualization.ComboChart(document.getElementById('rain_hour'));
-   hourChart.draw(hourData, options);
+         title: { text: "Next Hour Forecast by Minute"},
+         scales: {
+            xAxes: [{
+               type: 'time',
+               barPercentage: 0.2,
+               unit: 'minute',
+               unitStepSize: 1,
+               time: {
+                  displayFormats:{
+                     minute: 'h:mm a'
+                  },
+                  tooltipFormat: 'h:mm a'
 
-
-   var dayData = new google.visualization.DataTable();
-   dayData.addColumn('date', 'Date');
-   dayData.addColumn('number', 'Rain Chance');
-   dayData.addColumn('number', 'High Temperature');
-   dayData.addColumn('number', 'Low Temperature');
-   for (var i in myStatus["next_week_rain_chance"]){
-      dayData.addRow([new Date(i*1000),myStatus["next_week_rain_chance"][i].rain,myStatus["next_week_rain_chance"][i].hightemp,myStatus["next_week_rain_chance"][i].lowtemp]);
-   }
-   var options = {
-      title : 'Next Week High/Low Temperature and Rain Chance',
-      vAxes: [
-         //Define left Axis for % rain chance
-         {title: '% Rain Chance', format: 'percent', maxValue:1, minValue:0},
-         //Define right Axis for Temperature
-         {title: 'Temperature'}
-              ],
-      hAxis: {title: 'Time'},
-      seriesType: 'bars',
-      series: {
-         1: { targetAxisIndex:1, type: 'line' },
-         2: { targetAxisIndex:1, type: 'line' }
-      }
-    };
-   formatter.format(dayData, 1);
-   // Instantiate and draw our chart, passing in some options.
-   var dayChart = new google.visualization.ComboChart(document.getElementById('rain_day'));
-   dayChart.draw(dayData, options);
-
-}
-
-function getPrintedTime(time, timeanddate){
-      var d = new Date(1000*time);
-      var hour;
-      var ampm;
-      if(d.getHours()<12){
-         ampm='am';
-      }else{
-         ampm='pm';
-      }
-      if(d.getHours()==0){
-         hour=12;
-      }else{
-         if (d.getHours()>12){
-            hour=d.getHours()-12;
-         }else{
-            hour=d.getHours();
+               }
+            }],
+            yAxes:[{
+               scaleLabel:{
+                  labelString: "% Rain Chance",
+                  display: true
+               },
+               ticks:{
+                  max: 100,
+                  min: 0
+               }
+            }]
          }
-      }
+      };
 
-      if(timeanddate){
-         return getDayName(d) + " at " + hour + ':' + ('0' + d.getMinutes()).slice(-2) + ampm +'.';
-      }else{
-         return getDayName(d);
-      }
-}
-
-
-function getDayName(d){
-   var now = new Date();
-   var day = ""
-   switch(d.getDate()-now.getDate()){
-      case 0:
-         day = "today";
-         break;
-      case 1:
-         day = "tomorrow";
-         break;
-      default:
-         switch(d.getDay()){
-            case 0:
-               day = "Sunday";
-               break;
-            case 1:
-               day = "Monday";
-               break;
-            case 2:
-               day = "Tuesday";
-               break;
-            case 3:
-               day = "Wednesday";
-               break;
-            case 4:
-               day = "Thursday";
-               break;
-            case 5:
-               day = "Friday";
-               break;
-            case 6:
-               day = "Saturday";
-         }
+      var minuteChart = new Chart(document.getElementById('rain_minute'), {
+         type: 'bar',
+         data: minuteDataSets,
+         options: minuteOptions
+      });
    }
-   return day;
+
+   //Now populate the graph for the next 48 hours, hour by hour
+   //includes % precipitation chance and temperature
+   var hourDataSets = {
+      labels: [],
+      datasets: [
+         {
+            type: 'line',
+            label: "Temperature",
+            yAxisID: 'temp',
+            borderColor: 'red',
+            backgroundColor: 'red',
+            fill: false,
+            data: []
+         },
+         {
+            type: 'bar',
+            label: "Rain Chance",
+            yAxisID: 'rainChance',
+            borderColor: 'green',
+            backgroundColor: 'green',
+            data: []
+         }
+      ]
+   };
+
+   for (var i in myStatus['next_two_day_rain_chance']){
+      hourDataSets.labels.push(moment(1000*i));
+      hourDataSets.datasets[0].data.push(myStatus["next_two_day_rain_chance"][i].temp);
+      hourDataSets.datasets[1].data.push(Math.round(myStatus["next_two_day_rain_chance"][i].rain*100));
+   }
+
+   var hourOptions = {
+      title: { text: "Next Two Days Forecast by Hour" },
+      scales: {
+         xAxes: [{
+            type: 'time',
+            barPercentage: 0.15,
+            unit: 'hour',
+            time: {
+               displayFormats:{
+                  hour: 'ddd h a'
+               },
+               tooltipFormat: 'dddd h:mm a'
+            },
+         }],
+         yAxes:[{
+            scaleLabel:{
+               labelString: "% Rain Chance",
+               display: true
+            },
+            id: 'rainChance',
+            ticks:{
+               max: 100,
+               min: 0
+            }
+         },
+         {
+            scaleLabel:{
+               labelString: "Temperature "+String.fromCharCode(176)+"F",
+               display: true
+            },
+            id: 'temp',
+            position: 'right'
+         }]
+      }
+   };
+
+   var hourChart = new Chart(document.getElementById('rain_hour'), {
+      type: 'bar',
+       data: hourDataSets,
+       options: hourOptions
+   });
+
+   //Finally, make a graph for % rain chance, daily high and daily low temps
+   //Covers the next week
+   var dayDataSets = {
+      labels: [],
+      datasets: [{
+         type: 'line',
+         label: 'Low Temperature',
+         yAxisID: 'temp',
+         borderColor: 'blue',
+         backgroundColor: 'blue',
+         fill: false,
+         data: []
+      },
+      {
+         type: 'line',
+         label: 'High Temperature',
+         yAxisID: 'temp',
+         borderColor: 'red',
+         backgroundColor: 'red',
+         fill: false,
+         data: []
+      },{
+         type: 'bar',
+         label: "% Chance of Rain",
+         yAxisID: 'rainChance',
+         borderColor: 'green',
+         backgroundColor: 'green',
+         data: []
+      }]
+   };
+
+   for (var i in myStatus['next_week_rain_chance']){
+      dayDataSets.labels.push(moment(1000*i));
+      dayDataSets.datasets[0].data.push(myStatus["next_week_rain_chance"][i].lowtemp);
+      dayDataSets.datasets[1].data.push(myStatus["next_week_rain_chance"][i].hightemp);
+      dayDataSets.datasets[2].data.push(Math.round(myStatus["next_week_rain_chance"][i].rain*100));
+   }
+
+
+   var dayOptions = {
+      title: { text: "Next Week Forecast by Day" },
+      scales: {
+         xAxes: [{
+            type: 'time',
+            unit: 'day',
+            time: {
+               displayFormats:{
+                  day: 'dddd'
+               },
+               tooltipFormat: 'dddd MMMM Do'
+            }
+         }],
+         yAxes:[{
+            scaleLabel:{
+               labelString: "% Rain Chance",
+               display: true
+            },
+            id: 'rainChance',
+            ticks:{
+               max: 100,
+               min: 0
+            }
+         },
+         {
+            scaleLabel:{
+               labelString: "Temperature "+String.fromCharCode(176)+"F",
+               display: true
+            },
+            id: 'temp',
+            position: 'right'
+         }]
+      }
+   };
+
+   var dayChart = new Chart(document.getElementById('rain_day'), {
+      type: 'bar',
+       data: dayDataSets,
+       options: dayOptions
+   });
 }
 
 function getWeatherInfo(position){
@@ -200,8 +275,4 @@ function getLocation(){
 }
 
 document.getElementById("status").innerHTML = "Getting Location";
-// Load the Visualization API and the corechart package.
-google.charts.load('current', {'packages':['corechart']});
-
-// Set a callback to run when the Google Visualization API is loaded.
-google.charts.setOnLoadCallback(getLocation);
+getLocation();
