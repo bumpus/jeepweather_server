@@ -19,56 +19,8 @@ body{
 #time {
    color: green;
 }
-
-#rain_minute {
-   color: red;
-   clear:left;
-}
-
-#rain_hour {
-   color: purple;
-   clear:left;
-}
-
-#rain_day {
-   color: teal;
-   clear:left;
-}
-
 #power {
    position: fixed;
    bottom: 0;
    right: 0;
-}
-
-.raingraph {
-   position:relative;
-   float: left;
-   height: 40px;
-   width: 10px;
-   border: 1px solid black;
-}
-
-.graphbar {
-   position:absolute;
-   bottom: 0;
-   background: green;
-   width:inherit;
-}
-
-.raingraph .info{
-   visibility: hidden;
-   background-color: black;
-   color: #fff;
-   text-align: center;
-   padding: 5px;
-   border-radius: 6px;
-
-   left: 150%;
-
-   position: absolute;
-   z-index: 1;
-}
-.raingraph:hover .info {
-   visibility: visible;
 }

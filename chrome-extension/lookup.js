@@ -1,5 +1,5 @@
 var xmlhttp = new XMLHttpRequest();
-var url = "https://jeepweather.bump.us/api.php/1/";
+var url = "https://jeepweather.bump.us/api.php/2/";
 var refreshPeriod = 30;
 var inactivityTimeout = 5 * 60;
 
@@ -21,7 +21,7 @@ xmlhttp.onreadystatechange = function(){
       chrome.browserAction.setIcon({path:icon});
       chrome.browserAction.setBadgeText({text: information['current_temp']+""});
       if(information['rain_chance_time']!= null){
-         title += " Rain is coming " + getPrintedTime(information['rain_chance_time'],1);
+         title += " Rain is coming " + moment(information['rain_chance_time']*1000).calendar();
       }
       chrome.browserAction.setTitle({title:title});
       chrome.storage.local.set({'weatherdata': information});
@@ -48,6 +48,7 @@ function getLocation(){
       navigator.geolocation.getCurrentPosition(getWeatherInfo, getWeatherInfoIP);
    }else{
       console.log("Geolocation is not supported by this browser.");
+      getWeatherInfoIP(null);
    }
 }
 

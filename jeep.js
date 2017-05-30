@@ -51,7 +51,7 @@ function showStatus(myStatus){
          labels: [],
          datasets: [{
             type: 'bar',
-            label: "% Chance of Rain",
+            label: "Rain Chance",
             borderColor: 'green',
             backgroundColor: 'green',
             data: []
@@ -89,13 +89,20 @@ function showStatus(myStatus){
                   min: 0
                }
             }]
+         },
+         tooltips: {
+            callbacks: {
+               label: function(tooltipItems, data){
+                  return data.datasets[tooltipItems.datasetIndex].label +': ' + tooltipItems.yLabel + '%';
+               }
+            }
          }
       };
 
       var minuteChart = new Chart(document.getElementById('rain_minute'), {
          type: 'bar',
          data: minuteDataSets,
-         options: minuteOptions
+          options: minuteOptions
       });
    }
 
@@ -163,6 +170,19 @@ function showStatus(myStatus){
             id: 'temp',
             position: 'right'
          }]
+      },
+      tooltips: {
+         callbacks: {
+            label: function(tooltipItems, data){
+               var suffix;
+               if(0 == tooltipItems.datasetIndex){
+                  suffix = String.fromCharCode(176)+'F';
+               }else{
+                  suffix = '%';
+               }
+               return data.datasets[tooltipItems.datasetIndex].label +': ' + tooltipItems.yLabel + suffix;
+            }
+         }
       }
    };
 
@@ -195,7 +215,7 @@ function showStatus(myStatus){
          data: []
       },{
          type: 'bar',
-         label: "% Chance of Rain",
+         label: "Rain Chance",
          yAxisID: 'rainChance',
          borderColor: 'green',
          backgroundColor: 'green',
@@ -243,6 +263,19 @@ function showStatus(myStatus){
             id: 'temp',
             position: 'right'
          }]
+      },
+      tooltips: {
+         callbacks: {
+            label: function(tooltipItems, data){
+               var suffix;
+               if(2 == tooltipItems.datasetIndex){
+                  suffix = '%';
+               }else{
+                  suffix = String.fromCharCode(176)+'F';
+               }
+               return data.datasets[tooltipItems.datasetIndex].label +': ' + tooltipItems.yLabel + suffix;
+            }
+         }
       }
    };
 
