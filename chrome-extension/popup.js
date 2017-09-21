@@ -110,7 +110,6 @@ function showStatus(myStatus){
          scales: {
             xAxes: [{
                type: 'time',
-               barPercentage: 0.1,
                unit: 'minute',
                unitStepSize: 1,
                time: {
@@ -184,7 +183,6 @@ function showStatus(myStatus){
       scales: {
          xAxes: [{
             type: 'time',
-            barPercentage: 0.15,
             unit: 'hour',
             time: {
                displayFormats:{
