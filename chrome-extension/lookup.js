@@ -2,13 +2,16 @@ var xmlhttp = new XMLHttpRequest();
 var url = "https://jeepweather.bump.us/api.php/2/";
 var refreshPeriod = 30;
 var inactivityTimeout = 5 * 60;
-chrome.contextMenus.create({"title": "Reload Weather", "contexts":["browser_action"], "id": "reload"}); 
 
-chrome.contextMenus.onClicked.addListener( function(info, tab){
-   console.log("Context Menu was clicked " + info.menuItemId);
-   if ("reload" == info.menuItemId){
-      getLocation();
-   }
+chrome.runtime.onInstalled.addListener(function() {
+   chrome.contextMenus.create({"title": "Reload Weather", "contexts":["browser_action"], "id": "reload"}); 
+
+   chrome.contextMenus.onClicked.addListener( function(info, tab){
+      console.log("Context Menu was clicked " + info.menuItemId);
+      if ("reload" == info.menuItemId){
+         getLocation();
+      }
+   });
 });
 
 xmlhttp.onreadystatechange = function(){
