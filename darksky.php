@@ -1,6 +1,6 @@
 <?php
 class darksky{
-   private $base_url = "https://api.forecast.io/forecast/";
+   private $base_url = "https://api.darksky.net/forecast/";
    private $api_key = "Insert YOUR KEY here";
    private $location;
    private $service_url;
