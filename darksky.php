@@ -1,7 +1,7 @@
 <?php
 class darksky{
    private $base_url = "https://api.darksky.net/forecast/";
-   private $api_key = "Insert YOUR KEY here";
+   private $api_key = "dfd9d40971ae2f366b33808a85264dc9";
    private $location;
    private $service_url;
    
@@ -16,4 +16,3 @@ class darksky{
 
 }
 ?>
-

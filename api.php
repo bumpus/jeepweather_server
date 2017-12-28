@@ -47,7 +47,7 @@ class JeepForecast{
       //paramteres[2] = "1" - API version. This will let me redirect if I make changes later
       //parameters[3] = "NN.nnnn,EE.eeee" - Location lat/long separated by a comma
       //parameters[4] = Debug flag, 1 for on 0 for off
-      $parameters = explode('/',getenv('REQUEST_URI'));
+      $parameters = explode('/',$_SERVER['PHP_SELF']);
 
       //Use parameter from URL path or query string or default
       if (isset($_GET["version"])){
