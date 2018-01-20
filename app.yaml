@@ -2,13 +2,25 @@ runtime: php55
 api_version: 1
 
 handlers:
-# Serve images as static resources.
-- url: /(.+\.(html|gif|png|jpg|js|ico))$
+# Serve images, javascript, html, as static resources.
+- url: /(.+\.(css|html|gif|png|jpg|js|ico))$
   static_files: \1
-  upload: .+\.(gif|png|jpg)$
+  upload: .+\.(css|html|gif|png|jpg|js|ico)$
   application_readable: true
+  secure: always
+  redirect_http_response_code: 301
+
+# default url is index.html
+- url: /
+  static_files: index.html
+  upload: index.html
+  application_readable: true
+  secure: always
+  redirect_http_response_code: 301
 
 # Serve php scripts.
 - url: /(.+\.php)\/.*
   script: \1
+  secure: always
+  redirect_http_response_code: 301
 

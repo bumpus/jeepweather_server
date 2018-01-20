@@ -81,9 +81,14 @@ class JeepForecast{
 
       if($this->location == "IP"){
          // Client has failed to get location from browser
-         // Request IP base location from web service.
-         $locationservice = new ipinfo($_SERVER['REMOTE_ADDR']);
-         $this->location = $locationservice->get_location();
+         // Check to see if the Google Cloud API has a location guess for us.
+         if (isset($_SERVER['HTTP_X_APPENGINE_CITYLATLONG'])){
+            $this->location = $_SERVER['HTTP_X_APPENGINE_CITYLATLONG'];
+         }else{
+            // Request IP base location from web service.
+            $locationservice = new ipinfo($_SERVER['REMOTE_ADDR']);
+            $this->location = $locationservice->get_location();
+         }
       }
 
       // If somehow we still haven't got a location, use the location of the Jeep factory in Toledo
@@ -253,6 +258,10 @@ class JeepForecast{
       $results['next_week_rain_chance'] = $this->next_week_rain_chance;
 
       $results['current_temp'] = $this->current_temp;
+
+      $results['city'] = ucwords($_SERVER['HTTP_X_APPENGINE_CITY']);
+      $results['city'] .= ", ";
+      $results['city'] .= strtoupper($_SERVER['HTTP_X_APPENGINE_REGION']);
 
       return json_encode($results);
    }
