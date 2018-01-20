@@ -78,6 +78,10 @@ function showStatus(myStatus){
       chrome.browserAction.setTitle({title:statustext + " " + rain_time});
    }
 
+   if (myStatus["city"]!=null){
+      document.getElementById("city").innerHTML = myStatus["city"];
+   }
+
    //Here is where the charts are drawn
 
    // Start with some settings that will be common to the chart on this page
