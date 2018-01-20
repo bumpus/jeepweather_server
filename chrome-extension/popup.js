@@ -1,8 +1,16 @@
 var xmlhttp = new XMLHttpRequest();
 var url = "https://jeepweather.bump.us/api.php/2/";
+var debug = false;
+
+function dbgPrint(text){
+   if(debug){
+      console.log(text);
+   }
+}
+
 
 xmlhttp.onreadystatechange = function(){
-   console.log("xmlhttp.onreadystatechange");
+   dbgPrint("xmlhttp.onreadystatechange");
    if (this.readyState == 4 && this.status == 200){
       var information = JSON.parse(this.responseText);
       chrome.storage.local.set({'weatherdata': information});
@@ -13,7 +21,7 @@ xmlhttp.onreadystatechange = function(){
 document.addEventListener('DOMContentLoaded', onDOMContentLoaded);
 
 function getWeatherInfo(position){
-   console.log("getWeatherInfo");
+   dbgPrint("getWeatherInfo");
    var locationcoordinates = position.coords.latitude + "," + position.coords.longitude;
    document.getElementById("status").innerHTML = "Getting weather data for: " + locationcoordinates;
    xmlhttp.open("GET", url + locationcoordinates, true);
@@ -21,7 +29,7 @@ function getWeatherInfo(position){
 }
 
 function getLocation(){
-   console.log("getLocation")
+   dbgPrint("getLocation")
    if(navigator.geolocation){
       navigator.geolocation.getCurrentPosition(getWeatherInfo);
    }else{
@@ -30,22 +38,22 @@ function getLocation(){
 }
 
 function onDOMContentLoaded(){
-   console.log("onDOMContentLoaded");
+   dbgPrint("onDOMContentLoaded");
    chrome.storage.local.get('weatherdata', onGetWeatherData);
    document.getElementById("status").innerHTML = "Checking for weather data.";
 }
 
 function onGetWeatherData(result){
-   console.log("onGetWeatherDAta");
+   dbgPrint("onGetWeatherDAta");
    if (chrome.runtime.lastError) {
-      console.log("Error retrieving weatherdata: " + chrome.runtime.lastError);
+      dbgPrint("Error retrieving weatherdata: " + chrome.runtime.lastError);
       getLocation();
       document.getElementById("status").innerHTML = "Getting location";
    }else{
-     console.log("found weatherdata in storage");
-     console.log(JSON.stringify(result));
+     dbgPrint("found weatherdata in storage");
+     dbgPrint(JSON.stringify(result));
      if (null == result['weatherdata']){
-        console.log("Weatherdata is empty")
+        dbgPrint("Weatherdata is empty")
         getLocation();
         document.getElementById("status").innerHTML = "Getting location";
      }else{
@@ -55,7 +63,7 @@ function onGetWeatherData(result){
 }
 
 function showStatus(myStatus){
-   console.log("showStatus");
+   dbgPrint("showStatus");
    document.getElementById("temp").innerHTML = myStatus['current_temp']+"&deg;F";
    var statustext = "";
    var icon = "";
