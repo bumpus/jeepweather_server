@@ -1,8 +1,9 @@
 <?php
+include "config.inc";
 
 class ipinfo{
    private $base_url = "https://ipinfo.io/";
-   private $api_key = "Insert YOUR KEY here";
+   private $api_key = IPINFO_KEY;
    private $url_suffix = "loc";
    private $client_ip;
    private $service_url;

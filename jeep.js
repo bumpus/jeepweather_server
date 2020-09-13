@@ -1,5 +1,5 @@
 var xmlhttp = new XMLHttpRequest();
-var url = "api.php/2/";
+var url = "api.php/3/";
 var locationcoordinates = "";
 var myStatus;
 
@@ -55,7 +55,7 @@ function showStatus(myStatus){
          labels: [],
          datasets: [{
             type: 'bar',
-            label: "Rain Chance",
+            label: "Rain Intensity",
             borderColor: 'green',
             backgroundColor: 'green',
             data: []
@@ -64,7 +64,7 @@ function showStatus(myStatus){
 
       for (var i in myStatus['next_hour_rain_chance']){
          minuteDataSets.labels.push(moment(i*1000))
-         minuteDataSets.datasets[0].data.push(Math.round(myStatus["next_hour_rain_chance"][i]*100));
+         minuteDataSets.datasets[0].data.push(myStatus["next_hour_rain_chance"][i].rain);
       }
 
       var minuteOptions = {
@@ -84,11 +84,11 @@ function showStatus(myStatus){
             }],
             yAxes:[{
                scaleLabel:{
-                  labelString: "% Rain Chance",
+                  labelString: "Rain Intensity",
                   display: true
                },
                ticks:{
-                  max: 100,
+//                  max: 1,
                   min: 0
                }
             }]
@@ -96,7 +96,7 @@ function showStatus(myStatus){
          tooltips: {
             callbacks: {
                label: function(tooltipItems, data){
-                  return data.datasets[tooltipItems.datasetIndex].label +': ' + tooltipItems.yLabel + '%';
+                  return data.datasets[tooltipItems.datasetIndex].label +': ' + tooltipItems.yLabel + 'in/hour';
                }
             }
          }
@@ -137,7 +137,7 @@ function showStatus(myStatus){
    for (var i in myStatus['next_two_day_rain_chance']){
       hourDataSets.labels.push(moment(1000*i));
       hourDataSets.datasets[0].data.push(myStatus["next_two_day_rain_chance"][i].temp);
-      hourDataSets.datasets[1].data.push(Math.round(myStatus["next_two_day_rain_chance"][i].rain*100));
+      hourDataSets.datasets[1].data.push(myStatus["next_two_day_rain_chance"][i].rain);
    }
 
    var hourOptions = {
@@ -226,10 +226,10 @@ function showStatus(myStatus){
    };
 
    for (var i in myStatus['next_week_rain_chance']){
-      dayDataSets.labels.push(moment(1000*i));
+      dayDataSets.labels.push(moment(i));
       dayDataSets.datasets[0].data.push(myStatus["next_week_rain_chance"][i].lowtemp);
       dayDataSets.datasets[1].data.push(myStatus["next_week_rain_chance"][i].hightemp);
-      dayDataSets.datasets[2].data.push(Math.round(myStatus["next_week_rain_chance"][i].rain*100));
+      dayDataSets.datasets[2].data.push(myStatus["next_week_rain_chance"][i].rain);
    }
 
 

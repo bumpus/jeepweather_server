@@ -1,6 +1,6 @@
 <?php
 
-include "darksky.php";
+include "climacell.php";
 include "ipinfo.io.php";
 
 header('Content-Type: application/json');
@@ -8,9 +8,9 @@ header('Content-Type: application/json');
 class JeepForecast{
 
    //Some defined constant items
-   const minute_tolerance = 0.45;
-   const today_tolerance = 0.30;
-   const tomorrow_tolerance = 0.60;
+   const minute_tolerance = 45; //indicates a 15% average chance over a rolling 3 minutes
+   const today_tolerance = 30; //indicates a 10% average chance over a rolling 3 hours
+   const tomorrow_tolerance = 60; //indicates a 20% average chance over a rolling 3 hours
    
    //Define a string for date formate
    //Y = Four digit year
@@ -22,6 +22,7 @@ class JeepForecast{
    //a = am/pm
    private $timeformat = "Y-m-d h:i:s a";
 
+   private $webservice;
    private $forecast_json;
    private $forecast_php;
 
@@ -36,15 +37,15 @@ class JeepForecast{
 
    private $debug = false;
 
-   private $next_hour_rain_chance;
-   private $next_two_day_rain_chance;
-   private $next_week_rain_chance;
+   private $next_hour_rain_intensity;
+   private $next_two_day_rain_intensity;
+   private $next_week_rain_intensity;
 
    function __construct(){ 
       //Explode the request. I expect the following:
       //parameters[0] = "" - Directory path from the root of the server
       //parameters[1] = "api.php" - name of this script file
-      //paramteres[2] = "1" - API version. This will let me redirect if I make changes later
+      //paramteres[2] = "3" - API version. This will let me redirect if I make changes later
       //parameters[3] = "NN.nnnn,EE.eeee" - Location lat/long separated by a comma
       //parameters[4] = Debug flag, 1 for on 0 for off
       $parameters = explode('/',$_SERVER['PHP_SELF']);
@@ -56,7 +57,7 @@ class JeepForecast{
          if(isset($parameters[2]) && $parameters[2]){
             $this->api_version = $parameters[2];
          }else{
-            $this->api_version = 1;
+            $this->api_version = 3;
          }
       }
       
@@ -96,11 +97,9 @@ class JeepForecast{
          $this->location = "41.7012082,-83.5238018";
       }
 
-      $webservice = new darksky($this->location);
+      $this->webservice = new climacell($this->location);
 
-      $this->forecast_url = $webservice->get_url();
-      $this->getForecast();
-      $this->parse_json();
+      $this->get_forecast();
 
       //Analyze the data;
       $this->naked_jeep_weather = true;
@@ -116,31 +115,30 @@ class JeepForecast{
 
       $this->package_rain_chance();
 
-      $this->current_temp = round($this->forecast_php->currently->temperature);
+      //get the current temperature out of the first minuteast element
+      foreach($this->forecast_php['next_hour_rain_chance'] as $element){
+          $this->current_temp = round($element['temp']);
+          break;
+      }
       
 
 
    }
 
-   private function getForecast(){
-      $this->forecast_json = file_get_contents($this->forecast_url);
-   }
-
-   private function parse_json(){
-      //Parse the JSON response from forecast.io to a PHP class object
-      $this->forecast_php = json_decode($this->forecast_json);
+   private function get_forecast(){
+      $this->forecast_php = $this->webservice->get_data();
    }
 
    private function determine_next_hour(){
       for($i=2; $i<sizeof($this->forecast_php->minutely->data); $i++){
-         $three_minute_rainchance = $this->forecast_php->minutely->data[$i-2]->precipProbability +
-                                    $this->forecast_php->minutely->data[$i-1]->precipProbability +
-                                    $this->forecast_php->minutely->data[$i]->precipProbability;
+         $three_minute_rainintensity = $this->forecast_php->minutely->data[$i-2]->rain +
+                                       $this->forecast_php->minutely->data[$i-1]->rain +
+                                       $this->forecast_php->minutely->data[$i]->rain;
          if( $three_minute_rainchance > JeepForecast::minute_tolerance){
             //Greater than 15% chance of rain three minutes in a row
             //Determine when the rain chance starts
             for($j=($i-2); $j<=$i; $j++){
-               if($this->forecast_php->minutely->data[$j]->precipProbability >= (JeepForecast::minute_tolerance/3)){
+               if($this->forecast_php->minutely->data[$j]->rain >= (JeepForecast::minute_tolerance/3)){
                   $this->rain_chance_time = $this->forecast_php->minutely->data[$j]->time;
                   break;
                }
@@ -152,18 +150,11 @@ class JeepForecast{
    }
 
    private function determine_next_two_days(){
-      //Skip the current hour if minute by minute data is available
-      //This avoids a condition where the current hour may have a
-      //rain chance that has already passed.
-      if(isset($this->forecast_php->minutely)){
-         $startindex = 3;
-      }else{
-         $startindex = 2;
-      }
-      for($i=$startindex; $i<sizeof($this->forecast_php->hourly->data); $i++){
-         $three_hour_rainchance = $this->forecast_php->hourly->data[$i-2]->precipProbability +
-            $this->forecast_php->hourly->data[$i-1]->precipProbability +
-            $this->forecast_php->hourly->data[$i]->precipProbability;
+      $keys = array_keys($this->forecast_php['next_two_day_rain_chance']);
+      for($i=3; $i<sizeof($keys); $i++){
+         $three_hour_rainchance = $this->forecast_php['next_two_day_rain_chance'][strval($keys[$i-2])]['rain'] +
+            $this->forecast_php['next_two_day_rain_chance'][strval($keys[$i-1])]['rain'] +
+            $this->forecast_php['next_two_day_rain_chance'][strval($keys[$i])]['rain'];
 
          //I have a different tolerance for rain more than 24 hours away
          if($i>26){ //More than a day away
@@ -176,8 +167,8 @@ class JeepForecast{
          if($three_hour_rainchance > $tolerance){
             //Determine when the rain chance starts
             for($j=($i-2); $j<=$i; $j++){
-               if($this->forecast_php->hourly->data[$j]->precipProbability >= ($tolerance/3)){
-                  $this->rain_chance_time = $this->forecast_php->hourly->data[$j]->time;
+               if($this->forecast_php['next_two_day_rain_chance'][strval($keys[$j])]['rain'] >= ($tolerance/3)){
+                  $this->rain_chance_time = $keys[$j];
                   break;
                }
             }
@@ -188,48 +179,45 @@ class JeepForecast{
    }
 
    private function package_rain_chance(){
-      //I'll move from a decimal to a percent at this point for version 1 api
-      //version 2 api will return the result as a decimal
-      $factor = 100;
-      if(1<$this->api_version){
-         $factor = 1;
-      }
-      //Make an array of times and hourly rain chance
-      //Include forecast temperatures if available on API v2 or later
-      for($i=0; $i<sizeof($this->forecast_php->hourly->data); $i++){
-         if(1<$this->api_version){
-            $this->next_two_day_rain_chance[$this->forecast_php->hourly->data[$i]->time] = [
-               'rain'=> $this->forecast_php->hourly->data[$i]->precipProbability,
-               'temp'=> round($this->forecast_php->hourly->data[$i]->temperature)
-            ];
-         }else{
-            $this->next_two_day_rain_chance[$this->forecast_php->hourly->data[$i]->time] =
-               $factor * $this->forecast_php->hourly->data[$i]->precipProbability;
-         }
-      }
+        $this->next_two_day_rain_chance = $this->forecast_php['next_two_day_rain_chance'];
+        $this->next_hour_rain_chance = $this->forecast_php['next_hour_rain_chance'];
+        $this->next_week_rain_chance = $this->forecast_php['next_week_rain_chance'];
+        //Make an array of times and hourly rain intensity
+        //Include forecast temperatures if available on API v2 or later
+        //for($i=0; $i<sizeof($this->forecast_php->hourly->data); $i++){
+        //    if(1<$this->api_version){
+        //        $this->next_two_day_rain_chance[$this->forecast_php->hourly->data[$i]->time] = [
+        //        'rain'=> $this->forecast_php->hourly->data[$i]->precipProbability,
+        //        'temp'=> round($this->forecast_php->hourly->data[$i]->temperature)
+        //        ];
+        //    }else{
+        //        $this->next_two_day_rain_chance[$this->forecast_php->hourly->data[$i]->time] =
+        //        $factor * $this->forecast_php->hourly->data[$i]->precipProbability;
+        //    }
+        //}
 
       //Make an array of rain chance by the minute
-      if(isset($this->forecast_php->minutely)){
-         for($i=0;$i<sizeof($this->forecast_php->minutely->data); $i++){
-            $this->next_hour_rain_chance[$this->forecast_php->minutely->data[$i]->time] =
-               $factor * $this->forecast_php->minutely->data[$i]->precipProbability;
-         }
-      }
+      //if(isset($this->forecast_php->minutely)){
+      //   for($i=0;$i<sizeof($this->forecast_php->minutely->data); $i++){
+      //      $this->next_hour_rain_chance[$this->forecast_php->minutely->data[$i]->time] =
+      //         $factor * $this->forecast_php->minutely->data[$i]->precipProbability;
+      //   }
+      //}
 
       //Make an array of rain chance by the day for next week or so
       //Include max/min forecast temperatures if available on API v2 or later
-      for($i=0; $i<sizeof($this->forecast_php->daily->data); $i++){
-         if(1<$this->api_version){
-            $this->next_week_rain_chance[$this->forecast_php->daily->data[$i]->time] = [
-               'rain'=> $this->forecast_php->daily->data[$i]->precipProbability,
-               'hightemp'=> round($this->forecast_php->daily->data[$i]->temperatureMax),
-               'lowtemp'=> round($this->forecast_php->daily->data[$i]->temperatureMin)
-            ];
-         }else{
-            $this->next_week_rain_chance[$this->forecast_php->daily->data[$i]->time] =
-               $factor * $this->forecast_php->daily->data[$i]->precipProbability;
-         }
-      }
+      //for($i=0; $i<sizeof($this->forecast_php->daily->data); $i++){
+      //   if(1<$this->api_version){
+      //      $this->next_week_rain_chance[$this->forecast_php->daily->data[$i]->time] = [
+      //         'rain'=> $this->forecast_php->daily->data[$i]->precipProbability,
+      //         'hightemp'=> round($this->forecast_php->daily->data[$i]->temperatureMax),
+      //         'lowtemp'=> round($this->forecast_php->daily->data[$i]->temperatureMin)
+      //      ];
+      //   }else{
+      //      $this->next_week_rain_chance[$this->forecast_php->daily->data[$i]->time] =
+      //         $factor * $this->forecast_php->daily->data[$i]->precipProbability;
+      //   }
+      //}
    }
 
    function debug_enabled(){
@@ -251,7 +239,7 @@ class JeepForecast{
 
       $results['next_two_day_rain_chance'] = $this->next_two_day_rain_chance;
 
-      if (isset($this->forecast_php->minutely)){
+      if (isset($this->next_hour_rain_chance)){
          $results['next_hour_rain_chance'] = $this->next_hour_rain_chance;
       }
 
