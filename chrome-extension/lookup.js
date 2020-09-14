@@ -1,8 +1,8 @@
 var xmlhttp = new XMLHttpRequest();
-var url = "https://jeepweather.bump.us/api.php/2/";
+var url = "https://jeepweather.bump.us/api.php/3/";
 var refreshPeriod = 30;
 var inactivityTimeout = 5 * 60;
-var debug = false;
+var debug = true;
 
 function dbgPrint(text){
    if(debug){

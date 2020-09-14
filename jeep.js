@@ -105,7 +105,7 @@ function showStatus(myStatus){
       var minuteChart = new Chart(document.getElementById('rain_minute'), {
          type: 'bar',
          data: minuteDataSets,
-          options: minuteOptions
+         options: minuteOptions
       });
    }
 
