@@ -1,6 +1,6 @@
 var xmlhttp = new XMLHttpRequest();
 var url = "https://jeepweather.bump.us/api.php/3/";
-var debug = true;
+var debug = false;
 
 function dbgPrint(text){
    if(debug){
