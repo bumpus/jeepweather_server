@@ -114,15 +114,6 @@ class JeepForecast{
       }
 
       $this->package_rain_chance();
-
-      //get the current temperature out of the first minuteast element
-      foreach($this->forecast_php['next_hour_rain_chance'] as $element){
-          $this->current_temp = round($element['temp']);
-          break;
-      }
-      
-
-
    }
 
    private function get_forecast(){
@@ -131,9 +122,9 @@ class JeepForecast{
 
    private function determine_next_hour(){
       for($i=2; $i<sizeof($this->forecast_php->minutely->data); $i++){
-         $three_minute_rainintensity = $this->forecast_php->minutely->data[$i-2]->rain +
-                                       $this->forecast_php->minutely->data[$i-1]->rain +
-                                       $this->forecast_php->minutely->data[$i]->rain;
+         $three_minute_rainchance = $this->forecast_php->minutely->data[$i-2]->rain +
+                                    $this->forecast_php->minutely->data[$i-1]->rain +
+                                    $this->forecast_php->minutely->data[$i]->rain;
          if( $three_minute_rainchance > JeepForecast::minute_tolerance){
             //Greater than 15% chance of rain three minutes in a row
             //Determine when the rain chance starts
@@ -179,9 +170,10 @@ class JeepForecast{
    }
 
    private function package_rain_chance(){
+        $this->current_temp             = $this->forecast_php['current_temp'];
         $this->next_two_day_rain_chance = $this->forecast_php['next_two_day_rain_chance'];
-        $this->next_hour_rain_chance = $this->forecast_php['next_hour_rain_chance'];
-        $this->next_week_rain_chance = $this->forecast_php['next_week_rain_chance'];
+        $this->next_hour_rain_chance    = $this->forecast_php['next_hour_rain_chance'];
+        $this->next_week_rain_chance    = $this->forecast_php['next_week_rain_chance'];
    }
 
    function debug_enabled(){
