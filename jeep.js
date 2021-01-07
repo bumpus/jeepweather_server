@@ -226,7 +226,7 @@ function showStatus(myStatus){
    };
 
    for (var i in myStatus['next_week_rain_chance']){
-      dayDataSets.labels.push(moment(1000*i));
+      dayDataSets.labels.push(moment(1000*i).startOf('Day'));
       dayDataSets.datasets[0].data.push(myStatus["next_week_rain_chance"][i].lowtemp);
       dayDataSets.datasets[1].data.push(myStatus["next_week_rain_chance"][i].hightemp);
       dayDataSets.datasets[2].data.push(myStatus["next_week_rain_chance"][i].rain);
