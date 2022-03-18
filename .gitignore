@@ -1,3 +1,5 @@
 *~
 .*.swp
 config.inc
+.gcloudignore
+chrome-extension/jeepweather.zip
