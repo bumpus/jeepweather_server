@@ -28,19 +28,37 @@ class climacell{
      $ccData = json_decode(file_get_contents($this->url));
      $this->data['current_temp'] = $this->cToF($ccData->data->timelines[2]->intervals[0]->values->temperature);
 
-     foreach (array_slice($ccData->data->timelines[2]->intervals,0,61) as $minute){
+     $minute_index = 0;
+     $hour_index = 0;
+     $day_index = 0;
+     $timeline_count = count($ccData->data->timelines);
+     for ($i = 0; $i < $timeline_count; $i++) {
+       if ($ccData->data->timelines[$i]->timestep == "1m") {
+         $minute_index = $i;
+       }
+
+       if ($ccData->data->timelines[$i]->timestep == "1h") {
+         $hour_index = $i;
+       }
+
+       if ($ccData->data->timelines[$i]->timestep == "1d") {
+         $day_index = $i;
+       }
+     }
+
+     foreach (array_slice($ccData->data->timelines[$minute_index]->intervals,0,61) as $minute){
        $time = strtotime($minute->startTime); // This is going to be a unix timestamp. 
        $this->data['next_hour_rain_chance'][$time]['rain'] = $minute->values->precipitationProbability;
        $this->data['next_hour_rain_chance'][$time]['temp'] = $this->cToF($minute->values->temperature);
      }
 
-     foreach (array_slice($ccData->data->timelines[1]->intervals,0,49) as $hour){
+     foreach (array_slice($ccData->data->timelines[$hour_index]->intervals,0,49) as $hour){
        $time = strtotime($hour->startTime); // This is going to be a unix timestamp. 
        $this->data['next_two_day_rain_chance'][$time]['rain'] = $hour->values->precipitationProbability;
        $this->data['next_two_day_rain_chance'][$time]['temp'] = $this->cToF($hour->values->temperature);
      }
 
-     foreach(array_slice($ccData->data->timelines[0]->intervals,0,8) as $day){
+     foreach(array_slice($ccData->data->timelines[$day_index]->intervals,0,8) as $day){
        $time = strtotime($day->startTime); // This is going to be a unix timestamp. 
        $this->data['next_week_rain_chance'][$time]['rain'] = $day->values->precipitationProbability;
        $this->data['next_week_rain_chance'][$time]['lowtemp'] = $this->cToF($day->values->temperatureMin);
