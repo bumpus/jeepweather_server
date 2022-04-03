@@ -1,6 +1,6 @@
 <?php
 
-include "climacell.php";
+include "tomorrow.io.php";
 include "ipinfo.io.php";
 
 header('Content-Type: application/json');
@@ -97,7 +97,7 @@ class JeepForecast{
          $this->location = "41.7012082,-83.5238018";
       }
 
-      $this->webservice = new climacell($this->location);
+      $this->webservice = new tomorrow_io($this->location);
 
       $this->get_forecast();
 

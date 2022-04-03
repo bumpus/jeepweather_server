@@ -1,9 +1,9 @@
 <?php
 include "config.inc";
 
-class climacell{
+class tomorrow_io{
    private $base_url = BASE_URL;
-   private $api_key = CLIMACELL_KEY;
+   private $api_key = TOMORROW_IO_KEY;
    private $location;
    private $realtime_url;
    private $nowcast_url;
@@ -26,7 +26,6 @@ class climacell{
 
    private function fetch_data(){
      $ccData = json_decode(file_get_contents($this->url));
-     $this->data['current_temp'] = $this->cToF($ccData->data->timelines[2]->intervals[0]->values->temperature);
 
      $minute_index = 0;
      $hour_index = 0;
@@ -45,6 +44,8 @@ class climacell{
          $day_index = $i;
        }
      }
+
+     $this->data['current_temp'] = $this->cToF($ccData->data->timelines[$minute_index]->intervals[0]->values->temperature);
 
      foreach (array_slice($ccData->data->timelines[$minute_index]->intervals,0,61) as $minute){
        $time = strtotime($minute->startTime); // This is going to be a unix timestamp. 
@@ -82,6 +83,6 @@ class climacell{
 
 }
 
-# $cc = new climacell("41.9786551,-91.7340449");
+# $cc = new tomorrow_io("41.9786551,-91.7340449");
 # $cc->debug_dump();
 ?>
