@@ -1,8 +1,9 @@
-var xmlhttp = new XMLHttpRequest();
-var url = "https://jeepweather.bump.us/api.php/3/";
-var refreshPeriod = 30;
-var inactivityTimeout = 5 * 60;
-var debug = false;
+const url = "https://jeepweather.bump.us/api.php/3/";
+const refreshPeriod = 30;
+const inactivityTimeout = 5 * 60;
+const debug = false;
+const OFFSCREEN_DOCUMENT_PATH = '/offscreen.html';
+let creating; // A global promise to avoid concurrency issues with offscreen document
 
 function dbgPrint(text){
    if(debug){
@@ -11,7 +12,7 @@ function dbgPrint(text){
 }
 
 chrome.contextMenus.removeAll(function() {
-   chrome.contextMenus.create({"title": "Reload Weather", "contexts":["browser_action"], "id": "reload"}); 
+   chrome.contextMenus.create({"title": "Reload Weather", "contexts":["action"], "id": "reload"});
 
    chrome.contextMenus.onClicked.addListener( function(info, tab){
       dbgPrint("Context Menu was clicked " + info.menuItemId);
@@ -21,10 +22,23 @@ chrome.contextMenus.removeAll(function() {
    });
 });
 
-xmlhttp.onreadystatechange = function(){
-   dbgPrint("in onreadystatechange()");
-   if (this.readyState == 4 && this.status == 200){
-      var information = JSON.parse(this.responseText);
+async function getWeatherInfo(position){
+   dbgPrint("In getWeatherInfo()");
+   var queryurl = url;
+  if (null==position){
+    dbgPrint("Getting weather data by IP");
+    queryurl += "IP";
+  }else{
+    let locationcoordinates = position.coords.latitude + "," + position.coords.longitude;
+    dbgPrint("Getting weather data for: ", locationcoordinates);
+    queryurl += locationcoordinates;
+  }
+
+   const response = await fetch(queryurl);
+
+   dbgPrint("fetch resolved to a response");
+   if(response.ok){
+      var information = await response.json();
       var icon = "";
       var title = "";
       if(information['naked_jeep_weather']){
@@ -36,43 +50,89 @@ xmlhttp.onreadystatechange = function(){
          icon="closed-16.png";
          title = "Put your top on!";
       }
-      chrome.browserAction.setIcon({path:icon});
-      chrome.browserAction.setBadgeText({text: information['current_temp']+""});
+      chrome.action.setIcon({path:icon});
+      chrome.action.setBadgeText({text: information['current_temp']+""});
       if(information['rain_chance_time']!= null){
          title += " Rain is coming " + moment(information['rain_chance_time']*1000).calendar();
       }
-      chrome.browserAction.setTitle({title:title});
+      chrome.action.setTitle({title:title});
       chrome.storage.local.set({'weatherdata': information});
    }
-};
-
-function getWeatherInfo(position){
-   dbgPrint("In getWeatherInfo()");
-   var locationcoordinates = position.coords.latitude + "," + position.coords.longitude;
-   dbgPrint("Getting weather data for: ", locationcoordinates);
-   xmlhttp.open("GET", url + locationcoordinates, true);
-   xmlhttp.send();
 }
 
 function getWeatherInfoIP(position){
-   dbgPrint("Getting weather data for your estimated location");
-   xmlhttp.open("GET", url + "IP", true);
-   xmlhttp.send();
+  //Calls getWeatherInfo() with a null object to handle getCurrentPosition() Errors
+  //the position parameter is ignored, but will be passed by getCurrentPosition()'s
+  //error handling
+  getWeatherInfo(null);
 }
 
 function getLocation(){
-   dbgPrint("In getLocation()");
-   if(navigator.geolocation){
-      navigator.geolocation.getCurrentPosition(getWeatherInfo, getWeatherInfoIP);
-   }else{
-      dbgPrint("Geolocation is not supported by this browser.");
-      getWeatherInfoIP(null);
-   }
+  dbgPrint("In getLocation()");
+  getGeoLocation();
+}
+
+async function getGeoLocation(){
+  dbgPrint("In getGeoLocation()");
+  await setupOffscreenDocument(OFFSCREEN_DOCUMENT_PATH);
+  try{
+    geolocation = await chrome.runtime.sendMessage({
+      type: 'get-geolocation',
+      target: 'offscreen'
+    });
+  } catch (e) {
+    geolocation = null;
+  }
+  await closeOffscreenDocument();
+
+  getWeatherInfo(geolocation);
+
+  //if(navigator.geolocation){
+  //   navigator.geolocation.getCurrentPosition(getWeatherInfo, getWeatherInfoIP);
+  //}else{
+  //   dbgPrint("Geolocation is not supported by this browser.");
+  //   getWeatherInfo(null);
+  //}
+}
+
+async function hasDocument() {
+  // Check all windows controlled by the service worker to see if one
+  // of them is the offscreen document with the given path
+  const offscreenUrl = chrome.runtime.getURL(OFFSCREEN_DOCUMENT_PATH);
+  const matchedClients = await clients.matchAll();
+
+  return matchedClients.some(c => c.url === offscreenUrl)
+}
+
+async function setupOffscreenDocument(path) {
+  //if we do not have a document, we are already setup and can skip
+  if (!(await hasDocument())) {
+    // create offscreen document
+    if (creating) {
+      await creating;
+    } else {
+      creating = chrome.offscreen.createDocument({
+        url: path,
+        reasons: [chrome.offscreen.Reason.GEOLOCATION || chrome.offscreen.Reason.DOM_SCRAPING],
+        justification: 'add justification for geolocation use here',
+      });
+
+      await creating;
+      creating = null;
+    }
+  }
+}
+
+async function closeOffscreenDocument() {
+  if (!(await hasDocument())) {
+    return;
+  }
+  await chrome.offscreen.closeDocument();
 }
 
 function idleCheck(){
    dbgPrint("in idleCheck()");
-   chrome.idle.queryState(inactivityTimeout,idleResults); 
+   chrome.idle.queryState(inactivityTimeout,idleResults);
 }
 
 function idleResults(newState){
@@ -93,7 +153,7 @@ function onInit(){
 function onAlarm(alarm){
    dbgPrint("in onAlarm() ", alarm);
    if(alarm && alarm.name == 'refreshWeatherData'){
-      chrome.browserAction.setIcon({path:"unknown-16.png"});
+      chrome.action.setIcon({path:"unknown-16.png"});
       chrome.storage.local.set({'weatherdata': ""},idleCheck());
    }
 }
@@ -113,6 +173,7 @@ function checkInactivity(result){
    }
 }
 
+//chrome.runtime.onMessage.addListener(handleMessages);
 chrome.runtime.onInstalled.addListener(onInit);
 chrome.alarms.onAlarm.addListener(onAlarm);
 chrome.idle.onStateChanged.addListener(onIdleStateChanged);

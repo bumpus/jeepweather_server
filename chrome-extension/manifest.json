@@ -1,12 +1,12 @@
 {
-   "manifest_version": 2,
+   "manifest_version": 3,
    "name": "Jeep Weather Forecast",
    "name": "Jeep Weather",
-   "version": "0.2.0.2",
+   "version": "0.3.0.0",
 
    "description": "This extension shows the if there is dry weather ahead for Jeeping with the top down and the current temperature.",
 
-   "browser_action": 
+   "action":
    { 
       "default_icon": "unknown-16.png", 
       "default_popup": "popup.html" 
@@ -21,17 +21,20 @@
 
    "background":
    {
-      "scripts": ["lookup.js", "moment.min.js"],
-      "persistent": false
+      "service_worker": "lookup.js"
    },
 
    "permissions": 
    [ 
-      "geolocation", 
-      "storage", 
       "alarms",
-      "idle",
       "contextMenus",
+      "geolocation",
+      "idle",
+      "offscreen",
+      "storage"
+   ],
+
+   "host_permissions": [
       "https://jeepweather.bump.us/"
    ]
 }

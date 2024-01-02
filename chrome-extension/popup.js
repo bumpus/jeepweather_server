@@ -77,13 +77,13 @@ function showStatus(myStatus){
          icon = "closed-16.png";
       }
       document.getElementById("status").innerHTML = statustext;
-      chrome.browserAction.setIcon({path:icon});
+      chrome.action.setIcon({path:icon});
    }
 
    if (myStatus["rain_chance_time"]!=null){
       rain_time += moment(myStatus["rain_chance_time"]*1000).calendar(); 
       document.getElementById("time").innerHTML = rain_time;
-      chrome.browserAction.setTitle({title:statustext + " " + rain_time});
+      chrome.action.setTitle({title:statustext + " " + rain_time});
    }
 
    if (myStatus["city"]!=null){
