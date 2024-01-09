@@ -4,6 +4,7 @@ const inactivityTimeout = 5 * 60;
 const debug = false;
 const OFFSCREEN_DOCUMENT_PATH = '/offscreen.html';
 let creating; // A global promise to avoid concurrency issues with offscreen document
+importScripts('moment.min.js');
 
 function dbgPrint(text){
    if(debug){
