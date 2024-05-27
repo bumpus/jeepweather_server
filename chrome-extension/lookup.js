@@ -29,10 +29,13 @@ async function getWeatherInfo(position){
   if (null==position){
     dbgPrint("Getting weather data by IP");
     queryurl += "IP";
-  }else{
+  }else if (position.hasOwnProperty('coords')){
     let locationcoordinates = position.coords.latitude + "," + position.coords.longitude;
     dbgPrint("Getting weather data for: ", locationcoordinates);
     queryurl += locationcoordinates;
+  }else{
+    //just use whatever string we got
+    queryurl += position;
   }
 
    const response = await fetch(queryurl);
@@ -68,9 +71,17 @@ function getWeatherInfoIP(position){
   getWeatherInfo(null);
 }
 
-function getLocation(){
+async function getLocation(){
   dbgPrint("In getLocation()");
-  getGeoLocation();
+  items = await chrome.storage.local.get(['autoLocation', 'manualLocation']);
+  console.log(items);
+  if (items['autoLocation']){
+    getGeoLocation();
+  }
+  else{
+    dbgPrint("Getting weather for manual location");
+    getWeatherInfo(items['manualLocation']);
+  }
 }
 
 async function getGeoLocation(){
@@ -145,10 +156,11 @@ function idleResults(newState){
    }
 }
 
-function onInit(){
-   dbgPrint("in onInit()");
-   chrome.alarms.create('refreshWeatherData', {periodInMinutes:refreshPeriod});
-   chrome.storage.local.set({'weatherdata': ""},getLocation());
+async function onInit(){
+  dbgPrint("in onInit()");
+  chrome.alarms.create('refreshWeatherData', {periodInMinutes:refreshPeriod});
+  await chrome.storage.local.set({'weatherdata': ""});
+  await getLocation();
 }
 
 function onAlarm(alarm){
