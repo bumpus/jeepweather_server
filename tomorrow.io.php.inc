@@ -21,25 +21,25 @@ class tomorrow_io{
    private function fetch_data(){
      $ccData = json_decode(file_get_contents($this->url));
 
-     $this->data['current_temp'] = $ccData->timelines->minutely[0]->values->temperature;
+     $this->data['current_temp'] = round($ccData->timelines->minutely[0]->values->temperature);
 
      foreach (array_slice($ccData->timelines->minutely,0,61) as $minute){
        $time = strtotime($minute->time); // This is going to be a unix timestamp.
-       $this->data['next_hour_rain_chance'][$time]['rain'] = $minute->values->precipitationProbability;
-       $this->data['next_hour_rain_chance'][$time]['temp'] = $minute->values->temperature;
+       $this->data['next_hour_rain_chance'][$time]['rain'] = round($minute->values->precipitationProbability);
+       $this->data['next_hour_rain_chance'][$time]['temp'] = round($minute->values->temperature);
      }
 
      foreach (array_slice($ccData->timelines->hourly,0,49) as $hour){
        $time = strtotime($hour->time); // This is going to be a unix timestamp.
-       $this->data['next_two_day_rain_chance'][$time]['rain'] = $hour->values->precipitationProbability;
-       $this->data['next_two_day_rain_chance'][$time]['temp'] = $hour->values->temperature;
+       $this->data['next_two_day_rain_chance'][$time]['rain'] = round($hour->values->precipitationProbability);
+       $this->data['next_two_day_rain_chance'][$time]['temp'] = round($hour->values->temperature);
      }
 
      foreach(array_slice($ccData->timelines->daily,0,8) as $day){
        $time = strtotime($day->time); // This is going to be a unix timestamp.
-       $this->data['next_week_rain_chance'][$time]['rain'] = $day->values->precipitationProbabilityAvg;
-       $this->data['next_week_rain_chance'][$time]['lowtemp'] = $day->values->temperatureMin;
-       $this->data['next_week_rain_chance'][$time]['hightemp'] = $day->values->temperatureMax;
+       $this->data['next_week_rain_chance'][$time]['rain'] =     round($day->values->precipitationProbabilityAvg);
+       $this->data['next_week_rain_chance'][$time]['lowtemp'] =  round($day->values->temperatureMin);
+       $this->data['next_week_rain_chance'][$time]['hightemp'] = round($day->values->temperatureMax);
      }
 
      if (isset($ccData->location)){

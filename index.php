@@ -1,7 +1,7 @@
 <?php
 
-include "tomorrow.io.php";
-include "ipinfo.io.php";
+include "tomorrow.io.php.inc";
+include "ipinfo.io.php.inc";
 
 header('Content-Type: application/json');
 
@@ -45,18 +45,19 @@ class JeepForecast{
    function __construct(){ 
       //Explode the request. I expect the following:
       //parameters[0] = "" - Directory path from the root of the server
-      //parameters[1] = "api.php" - name of this script file
-      //paramteres[2] = "3" - API version. This will let me redirect if I make changes later
-      //parameters[3] = "NN.nnnn,EE.eeee" - Location lat/long separated by a comma
-      //parameters[4] = Debug flag, 1 for on 0 for off
+      //parameters[2] = "index.php" - name of this script file
+      //parameters[2] = "api.php" - name of this under router scrips
+      //paramteres[3] = "3" - API version. This will let me redirect if I make changes later
+      //parameters[4] = "NN.nnnn,EE.eeee" - Location lat/long separated by a comma
+      //parameters[5] = Debug flag, 1 for on 0 for off
       $parameters = explode('/',$_SERVER['PHP_SELF']);
 
       //Use parameter from URL path or query string or default
       if (isset($_GET["version"])){
          $this->api_version = $_GET["version"];
       }else{
-         if(isset($parameters[2]) && $parameters[2]){
-            $this->api_version = $parameters[2];
+         if(isset($parameters[3]) && $parameters[4]){
+            $this->api_version = $parameters[3];
          }else{
             $this->api_version = 3;
          }
@@ -66,8 +67,8 @@ class JeepForecast{
       if (isset($_GET["location"])){
          $this->location = $_GET["location"];
       }else{
-         if(isset($parameters[3]) && $parameters[3]!=""){
-            $this->location = $parameters[3];
+         if(isset($parameters[4]) && $parameters[4]!=""){
+            $this->location = $parameters[4];
          }
       }
 
@@ -75,8 +76,8 @@ class JeepForecast{
       if (isset($_GET["debug"])){
          $this->debug = (bool)$_GET["debug"];
       }else{
-         if(isset($parameters[4]) && $parameters[4]!=""){
-            $this->debug = (bool) $parameters[4];
+         if(isset($parameters[5]) && $parameters[5]!=""){
+            $this->debug = (bool) $parameters[5];
          }
       }
 

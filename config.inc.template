@@ -1,5 +1,5 @@
 <?php 
-define("TOMORROW_IO_KEY", "YOUR_KEY_HERE");
-define("BASE_URL", "https://api.tomorrow.io/v4/weather/");
-define("IPINFO_KEY", "YOUR_KEY_HERE");
+if (!defined("TOMORROW_IO_KEY")) define("TOMORROW_IO_KEY", "YOUR_KEY_HERE");
+if (!defined("BASE_URL"))        define("BASE_URL", "https://api.tomorrow.io/v4/weather/");
+if (!defined("IPINFO_KEY"))      define("IPINFO_KEY", "YOUR_KEY_HERE");
 ?>
