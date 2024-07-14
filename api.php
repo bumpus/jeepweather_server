@@ -26,7 +26,8 @@ class JeepForecast{
    private $forecast_json;
    private $forecast_php;
 
-   private $location = "41.7012082,-83.5238018"; //Default location is Jeep factory in Toledo
+   private $location = "Toledo%20OH"; //Default location is Jeep factory in Toledo
+   #private $location = "41.7012082,-83.5238018"; //Default location is Jeep factory in Toledo
    private $forecast_url;
 
    private $api_version;
@@ -203,20 +204,19 @@ class JeepForecast{
 
       $results['current_temp'] = $this->current_temp;
 
-      $results['city'] = ucwords($_SERVER['HTTP_X_APPENGINE_CITY']);
-      $results['city'] .= ", ";
-      $results['city'] .= strtoupper($_SERVER['HTTP_X_APPENGINE_REGION']);
+      if (isset($this->forecast_php['location']) && isset($this->forecast_php['location']->name)){
+        $results['city'] = $this->forecast_php['location']->name;
+      }else{
+        $results['city'] = ucwords($_SERVER['HTTP_X_APPENGINE_CITY']);
+        $results['city'] .= ", ";
+        $results['city'] .= strtoupper($_SERVER['HTTP_X_APPENGINE_REGION']);
+      }
 
       return json_encode($results);
    }
 
 
    //Functions for printing data for debug purposes.
-
-   function print_date(){
-      return date($this->timeformat."\n",$this->forecast_php->currently->time);
-   } 
-
    function print_minute_rain(){
       $string = "";
       foreach($this->forecast_php->minutely->data as $minute_forecast){
@@ -269,9 +269,7 @@ class JeepForecast{
 $myForecast = new JeepForecast;
 echo $myForecast->get_results();
 if($myForecast->debug_enabled()){
-   echo "\n\n\n****************\n\n\n";
-   echo $myForecast->print_date();
-   echo "\n\n\n****************\n\n\n";
+   echo "\n\n\n*************\n\n\n";
    echo $myForecast->print_summary();
    echo "\n\n\n****************\n\n\n";
    echo $myForecast->print_minute_rain();
