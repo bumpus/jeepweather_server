@@ -13,7 +13,7 @@ class tomorrow_io{
 
     private function build_url(){
      $this->url = $this->base_url . "forecast"
-       . "?location=" . $this->location
+       . "?location=" . urlencode(preg_replace("/[,]/", "", $this->location))
        . "&units=imperial"
        . "&apikey=" . $this->api_key;
    }
@@ -64,6 +64,6 @@ class tomorrow_io{
 }
 
 # $cc = new tomorrow_io("41.9786551,-91.7340449");
-# $cc = new tomorrow_io("toledo%20oh");
+# $cc = new tomorrow_io("toledo, oh");
 # $cc->debug_dump();
 ?>
