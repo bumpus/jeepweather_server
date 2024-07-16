@@ -67,40 +67,46 @@ function showStatus(myStatus){
          minuteDataSets.datasets[0].data.push(myStatus["next_hour_rain_chance"][i].rain);
       }
 
-      var minuteOptions = {
-         title: { text: "Next Hour Forecast by Minute"},
-         scales: {
-            xAxes: [{
-               type: 'time',
-               unit: 'minute',
-               unitStepSize: 1,
-               time: {
-                  displayFormats:{
-                     minute: 'h:mm a'
-                  },
-                  tooltipFormat: 'h:mm a'
-
-               }
-            }],
-            yAxes:[{
-               scaleLabel:{
-                  labelString: "% Rain Chance",
-                  display: true
-               },
-               ticks:{
-                  max: 100,
-                  min: 0
-               }
-            }]
+     var minuteOptions = {
+       scales: {
+         x: {
+           type: 'time',
+           unit: 'minute',
+           ticks: {
+             stepSize: 10,
+             major: true
+           },
+           time: {
+             displayFormats:{
+               minute: 'h:mm a'
+             },
+             tooltipFormat: 'h:mm a'
+           },
+           offset: false,
          },
-         tooltips: {
-            callbacks: {
-               label: function(tooltipItems, data){
-                  return data.datasets[tooltipItems.datasetIndex].label +': ' + tooltipItems.yLabel + '%';
-               }
-            }
+         y:{
+           title:{
+             text: "% Rain Chance",
+             display: true
+           },
+           max: 100,
+           min: 0
          }
-      };
+       },
+       plugins: {
+         title: { 
+           text: "Next Hour Forecast by Minute",
+           display: true
+         },
+         tooltip: {
+           callbacks: {
+             label: function(context){
+               return context.dataset.label +': ' + context.formattedValue + '%';
+             }
+           }
+         }
+       }
+     };
 
       var minuteChart = new Chart(document.getElementById('rain_minute'), {
          type: 'bar',
@@ -140,53 +146,46 @@ function showStatus(myStatus){
       hourDataSets.datasets[1].data.push(myStatus["next_two_day_rain_chance"][i].rain);
    }
 
-   var hourOptions = {
-      title: { text: "Next Two Days Forecast by Hour" },
-      scales: {
-         xAxes: [{
-            type: 'time',
-            unit: 'hour',
-            time: {
-               displayFormats:{
-                  hour: 'ddd h a'
-               },
-               tooltipFormat: 'dddd h:mm a'
-            },
-         }],
-         yAxes:[{
-            scaleLabel:{
-               labelString: "% Rain Chance",
-               display: true
-            },
-            id: 'rainChance',
-            ticks:{
-               max: 100,
-               min: 0
-            }
-         },
-         {
-            scaleLabel:{
-               labelString: "Temperature "+String.fromCharCode(176)+"F",
-               display: true
-            },
-            id: 'temp',
-            position: 'right'
-         }]
+  var minuteOptions = {
+    scales: {
+      x: {
+        type: 'time',
+        unit: 'minute',
+        ticks: {
+          stepSize: 10,
+          major: true
+        },
+        time: {
+          displayFormats:{
+            minute: 'h:mm a'
+          },
+          tooltipFormat: 'h:mm a'
+        },
+        offset: false,
       },
-      tooltips: {
-         callbacks: {
-            label: function(tooltipItems, data){
-               var suffix;
-               if(0 == tooltipItems.datasetIndex){
-                  suffix = String.fromCharCode(176)+'F';
-               }else{
-                  suffix = '%';
-               }
-               return data.datasets[tooltipItems.datasetIndex].label +': ' + tooltipItems.yLabel + suffix;
-            }
-         }
+      y:{
+        title:{
+          text: "% Rain Chance",
+          display: true
+        },
+        max: 100,
+        min: 0
       }
-   };
+    },
+    plugins: {
+      title: { 
+        text: "Next Hour Forecast by Minute",
+        display: true
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context){
+            return context.dataset.label +': ' + context.formattedValue + '%';
+          }
+        }
+      }
+    }
+  };
 
    var hourChart = new Chart(document.getElementById('rain_hour'), {
       type: 'bar',
@@ -233,53 +232,65 @@ function showStatus(myStatus){
    }
 
 
-   var dayOptions = {
-      title: { text: "Next Week Forecast by Day" },
-      scales: {
-         xAxes: [{
-            type: 'time',
-            unit: 'day',
-            time: {
-               displayFormats:{
-                  day: 'dddd'
-               },
-               tooltipFormat: 'dddd MMMM Do'
-            }
-         }],
-         yAxes:[{
-            scaleLabel:{
-               labelString: "% Rain Chance",
-               display: true
-            },
-            id: 'rainChance',
-            ticks:{
-               max: 100,
-               min: 0
-            }
-         },
-         {
-            scaleLabel:{
-               labelString: "Temperature "+String.fromCharCode(176)+"F",
-               display: true
-            },
-            id: 'temp',
-            position: 'right'
-         }]
+  var dayOptions = {
+    scales: {
+      x: {
+        axis: 'x',
+        type: 'time',
+        time: {
+          unit: 'day',
+          displayFormats:{
+            day: 'dddd'
+          },
+          tooltipFormat: 'dddd MMMM Do'
+        },
+        offset: false,
+        ticks: {
+          stepSize: 1,
+        },
+        offset: false,
       },
-      tooltips: {
-         callbacks: {
-            label: function(tooltipItems, data){
-               var suffix;
-               if(2 == tooltipItems.datasetIndex){
-                  suffix = '%';
-               }else{
-                  suffix = String.fromCharCode(176)+'F';
-               }
-               return data.datasets[tooltipItems.datasetIndex].label +': ' + tooltipItems.yLabel + suffix;
-            }
-         }
+      yrain:{
+        axis: 'y',
+        title:{
+          text: "% Rain Chance",
+          display: true
+        },
+        id: 'rainChance',
+        max: 100,
+        min: 0,
+        position: 'left'
+      },
+      ytemp:{
+        axis: 'y',
+        title:{
+          text: "Temperature "+String.fromCharCode(176)+"F",
+          display: true
+        },
+        id: 'temp',
+        position: 'right'
       }
-   };
+    },
+    plugins: {
+      title: {
+        text: "Next Week Forecast by Day",
+        display: true
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context){
+            var suffix;
+            if(2 == context.datasetIndex){
+              suffix = '%';
+            }else{
+              suffix = String.fromCharCode(176)+'F';
+            }
+            return context.dataset.label +': ' + context.formattedValue + suffix;
+          }
+        }
+      }
+    }
+  };
 
    var dayChart = new Chart(document.getElementById('rain_day'), {
       type: 'bar',
