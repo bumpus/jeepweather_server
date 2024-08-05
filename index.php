@@ -26,8 +26,9 @@ class JeepForecast{
    private $forecast_json;
    private $forecast_php;
 
-   private $location = "Toledo%20OH"; //Default location is Jeep factory in Toledo
-   #private $location = "41.7012082,-83.5238018"; //Default location is Jeep factory in Toledo
+   #private $location = "Toledo%20OH"; //Default location is Jeep factory in Toledo
+   private $location = "41.7012082,-83.5238018"; //Default location is Jeep factory in Toledo
+   private $units; //"C" or "F" to determine temperature units
    private $forecast_url;
 
    private $api_version;
@@ -46,10 +47,11 @@ class JeepForecast{
       //Explode the request. I expect the following:
       //parameters[0] = "" - Directory path from the root of the server
       //parameters[2] = "index.php" - name of this script file
-      //parameters[2] = "api.php" - name of this under router scrips
+      //parameters[2] = "api.php" - name of this under router scripts
       //paramteres[3] = "3" - API version. This will let me redirect if I make changes later
       //parameters[4] = "NN.nnnn,EE.eeee" - Location lat/long separated by a comma
-      //parameters[5] = Debug flag, 1 for on 0 for off
+      //parameters[5] = "C|F" - Temperature units
+      //parameters[6] = Debug flag, 1 for on 0 for off
       $parameters = explode('/',$_SERVER['PHP_SELF']);
 
       //Use parameter from URL path or query string or default
@@ -72,12 +74,22 @@ class JeepForecast{
          }
       }
 
+      if (isset($_GET["units"])){
+         $this->units = $_GET["units"];
+      }else{
+         if(isset($parameters[5])){
+            $this->units = strtoupper($parameters[5]);
+         }else{
+            $this->units = "F"; //use america units by default
+         }
+      }
+
       //Determine if debug is enabled
       if (isset($_GET["debug"])){
          $this->debug = (bool)$_GET["debug"];
       }else{
-         if(isset($parameters[5]) && $parameters[5]!=""){
-            $this->debug = (bool) $parameters[5];
+         if(isset($parameters[6]) && $parameters[6]!=""){
+            $this->debug = (bool) $parameters[6];
          }
       }
 
@@ -99,7 +111,7 @@ class JeepForecast{
          $this->location = "41.7012082,-83.5238018";
       }
 
-      $this->webservice = new tomorrow_io($this->location);
+      $this->webservice = new tomorrow_io($this->location, $this->units);
 
       $this->get_forecast();
 

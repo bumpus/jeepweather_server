@@ -43,9 +43,9 @@ function showStatus(myStatus){
    //Here is where the charts are drawn
 
    // Start with some settings that will be common to the chart on this page
-   Chart.defaults.global.maintainAspectRatio = true;
-   Chart.defaults.global.responsive = false;
-   Chart.defaults.global.title.display = true;
+   Chart.defaults.maintainAspectRatio = true;
+   Chart.defaults.responsive = false;
+   Chart.defaults.plugins.title.display = true;
    
    //First do the chart for the minute by minute, if that data is available
    if (myStatus.hasOwnProperty('next_hour_rain_chance')){
@@ -123,7 +123,7 @@ function showStatus(myStatus){
          {
             type: 'line',
             label: "Temperature",
-            yAxisID: 'temp',
+            yAxisID: 'ytemp',
             borderColor: 'red',
             backgroundColor: 'red',
             fill: false,
@@ -132,7 +132,7 @@ function showStatus(myStatus){
          {
             type: 'bar',
             label: "Rain Chance",
-            yAxisID: 'rainChance',
+            yAxisID: 'yrain',
             borderColor: 'green',
             backgroundColor: 'green',
             data: []
@@ -146,41 +146,54 @@ function showStatus(myStatus){
       hourDataSets.datasets[1].data.push(myStatus["next_two_day_rain_chance"][i].rain);
    }
 
-  var minuteOptions = {
+  var hourOptions = {
     scales: {
       x: {
         type: 'time',
-        unit: 'minute',
-        ticks: {
-          stepSize: 10,
-          major: true
-        },
+        unitStepSize: 10,
         time: {
+          unit: 'hour',
           displayFormats:{
-            minute: 'h:mm a'
+            hour: 'ddd h a'
           },
-          tooltipFormat: 'h:mm a'
+          tooltipFormat: 'dddd h:mm a'
+        },
+        ticks: {
+          stepSize: 6,
         },
         offset: false,
       },
-      y:{
+      yrain:{
         title:{
           text: "% Rain Chance",
           display: true
         },
         max: 100,
-        min: 0
+        min: 0,
+      },
+      ytemp:{
+        title:{
+          text: "Temperature "+String.fromCharCode(176)+"F",
+          display: true
+        },
+        position: 'right'
       }
     },
     plugins: {
-      title: { 
-        text: "Next Hour Forecast by Minute",
-        display: true
+      title: {
+        text: "Next Two Days Forecast by Hour",
+        display: true,
       },
       tooltip: {
         callbacks: {
           label: function(context){
-            return context.dataset.label +': ' + context.formattedValue + '%';
+            var suffix;
+            if(0 == context.datasetIndex){
+              suffix = String.fromCharCode(176)+'F';
+            }else{
+              suffix = '%';
+            }
+            return context.dataset.label +': ' + context.formattedValue + suffix;
           }
         }
       }
@@ -200,7 +213,7 @@ function showStatus(myStatus){
       datasets: [{
          type: 'line',
          label: 'Low Temperature',
-         yAxisID: 'temp',
+         yAxisID: 'ytemp',
          borderColor: 'blue',
          backgroundColor: 'blue',
          fill: false,
@@ -209,7 +222,7 @@ function showStatus(myStatus){
       {
          type: 'line',
          label: 'High Temperature',
-         yAxisID: 'temp',
+         yAxisID: 'ytemp',
          borderColor: 'red',
          backgroundColor: 'red',
          fill: false,
@@ -217,7 +230,7 @@ function showStatus(myStatus){
       },{
          type: 'bar',
          label: "Rain Chance",
-         yAxisID: 'rainChance',
+         yAxisID: 'yrain',
          borderColor: 'green',
          backgroundColor: 'green',
          data: []

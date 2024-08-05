@@ -10,11 +10,12 @@ class tomorrow_io{
    private $hourly_url;
    private $daily_url;
    private $data;
+   private $units;
 
     private function build_url(){
      $this->url = $this->base_url . "forecast"
-       . "?location=" . urlencode(preg_replace("/[,]/", "", $this->location))
-       . "&units=imperial"
+       . "?location=" . urlencode($this->location)
+       . "&units=" . urlencode($this->units)
        . "&apikey=" . $this->api_key;
    }
 
@@ -51,8 +52,13 @@ class tomorrow_io{
      return $this->data;
    }
 
-   public function __construct($search_location){
+   public function __construct($search_location, $search_units){
       $this->location = $search_location;
+      if($search_units == "C"){
+        $this->units = "metric";
+      }else{
+        $this->units = "imperial";
+      }
       $this->build_url();
       $this->fetch_data();
    }
@@ -64,6 +70,6 @@ class tomorrow_io{
 }
 
 # $cc = new tomorrow_io("41.9786551,-91.7340449");
-# $cc = new tomorrow_io("toledo, oh");
+# $cc = new tomorrow_io("toledo oh");
 # $cc->debug_dump();
 ?>
