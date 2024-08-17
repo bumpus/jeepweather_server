@@ -38,6 +38,13 @@ async function getWeatherInfo(position){
     queryurl += position;
   }
 
+  items = await chrome.storage.local.get(['celcius']);
+  if (items['celcius'] == true){
+    queryurl += "/C";
+  }else{
+    queryurl += "/F";
+  }
+
    const response = await fetch(queryurl);
 
    dbgPrint("fetch resolved to a response");

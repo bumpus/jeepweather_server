@@ -2,9 +2,10 @@
 const saveOptions = () => {
   const ChromeService = document.getElementById('auto-location').checked;
   const user = document.getElementById('manual-location').value;
+  const useCelcius = document.getElementById('celcius').checked;
 
   chrome.storage.local.set(
-    { autoLocation: ChromeService, manualLocation: user },
+    { autoLocation: ChromeService, manualLocation: user, celcius: useCelcius },
     () => {
       // Update status to let user know options were saved.
       const status = document.getElementById('status');
@@ -20,11 +21,12 @@ const saveOptions = () => {
 // stored in chrome.storage.
 const restoreOptions = () => {
   chrome.storage.local.get(
-    { autoLocation: 'true', manualLocation: '' },
+    { autoLocation: 'true', manualLocation: '', calcius: 'false' },
     (items) => {
       console.log(items);
       document.getElementById('auto-location').checked = items.autoLocation;
       document.getElementById('manual-location').value = items.manualLocation;
+      document.getElementById('celcius').value = items.celcius;
       disableManualField();
     }
   );

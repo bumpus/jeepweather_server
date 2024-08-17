@@ -62,9 +62,17 @@ function onGetWeatherData(result){
   }
 }
 
-function showStatus(myStatus){
+async function showStatus(myStatus){
   dbgPrint("showStatus");
-  document.getElementById("temp").innerHTML = myStatus['current_temp']+"&deg;F";
+
+  items = await chrome.storage.local.get(['celcius']);
+  if (items['celcius']){
+    tempUnits = 'C';
+  }else{
+    tempUnits = 'F';
+  }
+
+  document.getElementById("temp").innerHTML = myStatus['current_temp']+"&deg;"+tempUnits;
   var statustext = "";
   var icon = "";
   var rain_time = "Rain is coming ";
@@ -223,7 +231,7 @@ function showStatus(myStatus){
       },
       ytemp:{
         title:{
-          text: "Temperature "+String.fromCharCode(176)+"F",
+          text: "Temperature "+String.fromCharCode(176)+tempUnits,
           display: true
         },
         position: 'right'
@@ -239,7 +247,7 @@ function showStatus(myStatus){
           label: function(context){
             var suffix;
             if(0 == context.datasetIndex){
-              suffix = String.fromCharCode(176)+'F';
+              suffix = String.fromCharCode(176)+tempUnits;
             }else{
               suffix = '%';
             }
@@ -327,7 +335,7 @@ function showStatus(myStatus){
       ytemp:{
         axis: 'y',
         title:{
-          text: "Temperature "+String.fromCharCode(176)+"F",
+          text: "Temperature "+String.fromCharCode(176)+tempUnits,
           display: true
         },
         id: 'temp',
@@ -346,7 +354,7 @@ function showStatus(myStatus){
             if(2 == context.datasetIndex){
               suffix = '%';
             }else{
-              suffix = String.fromCharCode(176)+'F';
+              suffix = String.fromCharCode(176)+tempUnits;
             }
             return context.dataset.label +': ' + context.formattedValue + suffix;
           }
